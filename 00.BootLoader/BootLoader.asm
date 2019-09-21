@@ -73,44 +73,24 @@ START:
     mov bx, CURDATAMESSAGE2
     mov ah, 0x04
     int 0x1a
+
     ;day
     mov al,dl
     mov ah,al
     shr ah,4 ; 10
     and al, 0x0F ;1
-    add ah,48
-    add al,48
-    mov byte[bx],ah
-    add bx,1
-    mov byte[bx],al
-    add bx,2
-    ;month
-    mov al,dh
-    mov ah,al
-    shr ah,4 ; 10
-    and al, 0x0F ;1
-    add ah,48
-    add al,48
-    mov byte[bx],ah
-    add bx,1
-    mov byte[bx],al
-    add bx,2
-    ;20
-    mov al,ch
-    mov ah,al
-    shr ah,4 ; 10
-    and al, 0x0F ;1
-    add ah,48
-    add al,48
-    mov byte[bx],ah
-    add bx,1
-    mov byte[bx],al
-    add bx,1
-    ;19    
-    mov al,ch
-    mov ah,al
-    shr ah,4 ; 10
-    and al, 0x0F ;1
+    ;
+    push ax
+    shr ax,8
+    mov di,10
+    mul di
+    mov di,ax
+    mov si,[esp+0x08]
+    and si,0x00FF
+    add di,si
+    pop ax
+    push di
+    ;
     add ah,48
     add al,48
     mov byte[bx],ah
@@ -118,6 +98,80 @@ START:
     mov byte[bx],al
     add bx,2
 
+    ;month
+    mov al,dh
+    mov ah,al
+    shr ah,4 ; 10
+    and al, 0x0F ;1
+    ;
+    push ax
+    shr ax,8
+    mov di,10
+    mul di
+    mov si,[esp+0x08]
+    and si,0x00FF
+    add di,si
+    pop ax
+    push di
+    ;
+    add ah,48
+    add al,48
+    mov byte[bx],ah
+    add bx,1
+    mov byte[bx],al
+    add bx,2
+
+    ;20
+    mov al,ch
+    mov ah,al
+    shr ah,4 ; 10
+    and al, 0x0F ;1
+    ;
+    push ax
+    shr ax,8
+    mov di,1000
+    mul di
+    mov di,ax
+    mov ax,[esp+0x08]
+    and ax,0x00FF
+    mov si,100
+    mul si
+    ;
+    add ah,48
+    add al,48
+    mov byte[bx],ah
+    add bx,1
+    mov byte[bx],al
+    add bx,1
+
+    ;19    
+    mov al,cl
+    mov ah,al
+    shr ah,4 ; 10
+    and al, 0x0F ;1
+    add ah,48
+    add al,48
+    ;
+    push ax
+    shr ax,8
+    mov si,10
+    mul si
+    mov si,ax
+    mov ax,[esp+0x08]
+    and ax,0x00FF
+    add si,ax
+    pop ax
+    pop di
+    add di,si
+    push di
+    ;
+    mov byte[bx],ah
+    add bx,1
+    mov byte[bx],al
+    add bx,2
+    
+    call GetDate
+    
     push CURDATAMESSAGE2    ; 출력할 메시지의 어드레스를 스택에 삽입           
     push 1                      ; 화면 Y 좌표(1)를 스택에 삽입                     
     push 14                      ; 화면 X 좌표(0)를 스택에 삽입                     
@@ -195,6 +249,28 @@ READEND:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   함수 코드 영역
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;GetDate
+GetDate:
+    push bp         ; 베이스 포인터 레지스터(BP)를 스택에 삽입
+    mov bp, sp      ; 베이스 포인터 레지스터(BP)에 스택 포인터 레지스터(SP)의 값을 설정
+                    ; 베이스 포인터 레지스터(BP)를 이용해서 파라미터에 접근할 목적
+
+    push es         ; ES 세그먼트 레지스터부터 DX 레지스터까지 스택에 삽입
+    push si         ; 함수에서 임시로 사용하는 레지스터로 함수의 마지막 부분에서
+    push di         ; 스택에 삽입된 값을 꺼내 원래 값으로 복원
+    push ax
+    push cx
+    push dx
+
+.END:
+    pop dx      ; 함수에서 사용이 끝난 DX 레지스터부터 ES 레지스터까지를 스택에
+    pop cx      ; 삽입된 값을 이용해서 복원
+    pop ax      ; 스택은 가장 마지막에 들어간 데이터가 가장 먼저 나오는 
+    pop di      ; 자료구조(Last-In, First-Out)이므로 삽입(push)의 역순으로
+    pop si      ; 제거(pop) 해야 함
+    pop es
+    pop bp      ; 베이스 포인터 레지스터(BP) 복원
+    ret         ; 함수를 호출한 다음 코드의 위치로 복귀
 ; 디스크 에러를 처리하는 함수   
 HANDLEDISKERROR:
     push DISKERRORMESSAGE   ; 에러 문자열의 어드레스를 스택에 삽입
