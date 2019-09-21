@@ -63,7 +63,7 @@ START:
     call PRINTMESSAGE           ; PRINTMESSAGE 함수 호출                           
     add  sp, 6                  ; 삽입한 파라미터 제거
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ; Print Time
+    ; Print day month year century
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     push CURDATAMESSAGE1    ; 출력할 메시지의 어드레스를 스택에 삽입           
     push 1                      ; 화면 Y 좌표(2)를 스택에 삽입                     
@@ -73,7 +73,7 @@ START:
     mov bx, CURDATAMESSAGE2
     mov ah, 0x04
     int 0x1a
-
+    ;day
     mov al,dl
     mov ah,al
     shr ah,4 ; 10
@@ -84,7 +84,7 @@ START:
     add bx,1
     mov byte[bx],al
     add bx,2
-
+    ;month
     mov al,dh
     mov ah,al
     shr ah,4 ; 10
@@ -95,7 +95,7 @@ START:
     add bx,1
     mov byte[bx],al
     add bx,2
-
+    ;20
     mov al,ch
     mov ah,al
     shr ah,4 ; 10
@@ -106,8 +106,8 @@ START:
     add bx,1
     mov byte[bx],al
     add bx,1
-    
-    mov al,cl
+    ;19    
+    mov al,ch
     mov ah,al
     shr ah,4 ; 10
     and al, 0x0F ;1
@@ -122,8 +122,8 @@ START:
     push 1                      ; 화면 Y 좌표(1)를 스택에 삽입                     
     push 14                      ; 화면 X 좌표(0)를 스택에 삽입                     
     call PRINTMESSAGE           ; PRINTMESSAGE 함수 호출
-    add sp,6       
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    add sp,6
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ; 디스크에서 OS 이미지를 로딩
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -177,15 +177,7 @@ READDATA:                           ; 디스크를 읽는 코드의 시작
                         ; 값으로 변환
     mov es, si          ; ES 세그먼트 레지스터에 더해서 어드레스를 한 섹터 만큼 증가
     
-    ; 한 섹터를 읽었으므로 섹터 번호를 증가시키고 마지막 섹터(18)까지 읽었는지 판단
-    ; 마지막 섹터가 아니면 섹터 읽기로 이동해서 다시 섹터 읽기 수행
-    mov al, byte [ SECTORNUMBER ]       ; 섹터 번호를 AL 레지스터에 설정
-    add al, 0x01                        ; 섹터 번호를 1 증가
-    mov byte [ SECTORNUMBER ], al       ; 증가시킨 섹터 번호를 SECTORNUMBER에 다시 설정
-    cmp al, 19                          ; 증가시킨 섹터 번호를 19와 비교
-    jl READDATA                         ; 섹터 번호가 19 미만이라면 READDATA로 이동
-    
-    ; 마지막 섹터까지 읽었으면(섹터 번호가 19이면) 헤드를 토글(0->1, 1->0)하고, 
+    ; bootloader2 sector read, 헤드를 토글(0->1, 1->0)하고, 
     ; 섹터 번호를 1로 설정
     xor byte [ HEADNUMBER ], 0x01       ; 헤드 번호를 0x01과 XOR하여 토글(0->1, 1->1)
     mov byte [ SECTORNUMBER ], 0x01     ; 섹터 번호를 다시 1로 설정
