@@ -257,7 +257,7 @@ ENUMDAY :         dw  0
 
 TEST : db '0', 0
 
-DISKERRORMESSAGE:       db  'DISK Error~!!', 0
+
 SECTORNUMBER:           db  0x02    
 HEADNUMBER:             db  0x00    
 TRACKNUMBER:            db  0x00    
