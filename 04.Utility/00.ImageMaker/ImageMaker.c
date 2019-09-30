@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
-#include <io.h>
+#include "io.h"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
     }
     
     // Disk.img 파일을 생성
-    if( ( iTargetFd = open( "Disk.img", O_RDWR | O_CREAT |  O_TRUNC | S_IREAD | S_IWRITE ) ) == -1 )
+    if( ( iTargetFd = open( "Disk.img", O_RDWR | O_CREAT |  O_TRUNC | __S_IREAD | __S_IWRITE ) ) == -1 )
     {
         fprintf( stderr , "[ERROR] Disk.img open fail.\n" );
         exit( -1 );
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
     //--------------------------------------------------------------------------
     printf( "[INFO] Start to write kernel information\n" );    
     // 부트섹터의 5번째 바이트부터 커널에 대한 정보를 넣음
-    WriteKernelInformation( iTargetFd, iKernel32SectorCount );
+    // WriteKernelInformation( iTargetFd, iKernel32SectorCount );
     printf( "[INFO] Image file create complete\n" );
 
     close( iTargetFd );

@@ -33,25 +33,13 @@ Disk.img: 00.BootLoader/BootLoader.bin 00.BootLoader/BootLoader2.bin 01.Kernel32
 	@echo 
 
 	./ImageMaker.exe $^
-	# cat 00.BootLoader/BootLoader.bin 00.BootLoader/BootLoader2.bin 01.Kernel32/Kernel32.bin > Disk.img
+	chmod 777 Disk.img
 	@echo 
 	@echo ============= All Build Complete =============
 	@echo 
 
 run: 
-	qemu-system-x86_64 -L . -m 64 -fda Disk.img -localtime -M pc -rtc base=localtime
-# 유틸리티 빌드
-# Utility:
-# 	@echo 
-# 	@echo =========== Utility Build Start ===========
-# 	@echo 
-
-# 	make -C 04.Utility
-
-# 	@echo 
-# 	@echo =========== Utility Build Complete ===========
-# 	@echo 
-	
+	qemu-system-x86_64 -L . -m 64 -fda Disk.img -localtime -M pc -rtc base=localtime	
 	
 # 소스 파일을 제외한 나머지 파일 정리	
 clean:
