@@ -1,6 +1,5 @@
 # 기본적으로 빌드를 수행할 목록
 all: BootLoader Kernel32 Disk.img
-#  Utility
 
 # 부트 로더 빌드를 위해 부트 로더 디렉터리에서 make 실행
 BootLoader:
@@ -33,8 +32,8 @@ Disk.img: 00.BootLoader/BootLoader.bin 00.BootLoader/BootLoader2.bin 01.Kernel32
 	@echo =========== Disk Image Build Start ===========
 	@echo 
 
-	# ./ImageMaker.exe $^
-	cat 00.BootLoader/BootLoader.bin 00.BootLoader/BootLoader2.bin 01.Kernel32/Kernel32.bin > Disk.img
+	./ImageMaker.exe $^
+	# cat 00.BootLoader/BootLoader.bin 00.BootLoader/BootLoader2.bin 01.Kernel32/Kernel32.bin > Disk.img
 	@echo 
 	@echo ============= All Build Complete =============
 	@echo 
@@ -58,5 +57,5 @@ run:
 clean:
 	make -C 00.BootLoader clean
 	make -C 01.Kernel32 clean
-	# make -C 04.Utility clean
+	make -C 04.Utility clean
 	rm -f Disk.img	

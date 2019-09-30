@@ -1,12 +1,8 @@
-# file		makefile
-# date		2008/12/16
-# author	kkamagui 
-# brief		À¯Æ¿¸®Æ¼¸¦ »ı¼ºÇÏ±â À§ÇÑ make ÆÄÀÏ
 
-# ±âº»ÀûÀ¸·Î ºôµå¸¦ ¼öÇàÇÒ ¸ñ·Ï
+# ê¸°ë³¸ì ìœ¼ë¡œ ë¹Œë“œë¥¼ ìˆ˜í–‰í•  ëª©ë¡
 all: ImageMaker
 
-# ÀÌ¹ÌÁö ¸ŞÀÌÄ¿ ºôµå¸¦ À§ÇØ ImageMaker µğ·ºÅÍ¸®¿¡¼­ make ½ÇÇà
+# ì´ë¯¸ì§€ ë©”ì´ì»¤ ë¹Œë“œë¥¼ ìœ„í•´ ImageMaker ë””ë ‰í„°ë¦¬ì—ì„œ make ì‹¤í–‰
 ImageMaker:
 	@echo 
 	@echo ============= Build ImageMaker ===============
@@ -18,6 +14,6 @@ ImageMaker:
 	@echo =============== Build Complete ===============
 	@echo 
 	
-# ¼Ò½º ÆÄÀÏÀ» Á¦¿ÜÇÑ ³ª¸ÓÁö ÆÄÀÏ Á¤¸®	
+# ì†ŒìŠ¤ íŒŒì¼ì„ ì œì™¸í•œ ë‚˜ë¨¸ì§€ íŒŒì¼ ì •ë¦¬	
 clean:
 	make -C 00.ImageMaker clean
