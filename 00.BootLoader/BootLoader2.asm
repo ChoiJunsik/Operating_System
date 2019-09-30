@@ -4,12 +4,12 @@
 
 SECTION .text       
 
-jmp 0x1000:START    
+jmp 0x07E0:START    
 
-TOTALSECTORCOUNT:   dw  1024    
+TOTALSECTORCOUNT:   dw  1    
 
 START:
-    mov ax, 0x1000  
+    mov ax, 0x07E0  
     mov ds, ax      
     mov ax, 0xB800  
     mov es, ax      
@@ -95,7 +95,7 @@ RESETDISK:
     int 0x13
     jc  HANDLEDISKERROR
 
-    mov si, 0x1020                              
+    mov si, 0x1000                              
     mov es, si                      
     mov bx, 0x0000                  
 
@@ -140,7 +140,7 @@ READEND:
     call PRINTMESSAGE               
     add  sp, 6                      
 
-    jmp 0x1020:0x0000
+    jmp 0x1000:0x0000
 
 HANDLEDISKERROR:
     push DISKERRORMESSAGE   

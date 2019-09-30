@@ -137,7 +137,7 @@ RESETDISK:
     int 0x13
     jc  HANDLEDISKERROR
 
-    mov si, 0x1000                            
+    mov si, 0x07E0                            
     mov es, si                      
     mov bx, 0x0000                  
                                     
@@ -152,7 +152,7 @@ READDATA:
     int 0x13                            
     jc HANDLEDISKERROR                  
 READEND:
-    jmp 0x1000:0x0000
+    jmp 0x07E0:0x0000
 
 PRINTMESSAGE:
     push bp         
