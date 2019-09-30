@@ -38,7 +38,9 @@ Disk.img: 00.BootLoader/BootLoader.bin 00.BootLoader/BootLoader2.bin 01.Kernel32
 	@echo 
 	@echo ============= All Build Complete =============
 	@echo 
-	
+
+run: 
+	qemu-system-x86_64 -L . -m 64 -fda Disk.img -localtime -M pc -rtc base=localtime
 # 유틸리티 빌드
 # Utility:
 # 	@echo 
