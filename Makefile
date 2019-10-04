@@ -1,5 +1,5 @@
 # 기본적으로 빌드를 수행할 목록
-all: BootLoader Kernel32 Kernel64 Disk.img
+all: BootLoader Kernel32 Kernel64 Utility Disk.img
 
 # 부트 로더 빌드를 위해 부트 로더 디렉터리에서 make 실행
 BootLoader:
@@ -47,7 +47,8 @@ Disk.img: 00.BootLoader/BootLoader.bin 00.BootLoader/BootLoader2.bin 01.Kernel32
 	@echo 
 	@echo ============= All Build Complete =============
 	@echo 
-
+Utility:
+	make -C 04.Utility
 run: 
 	qemu-system-x86_64 -L . -m 64 -fda Disk.img -localtime -M pc -rtc base=localtime	
 	
