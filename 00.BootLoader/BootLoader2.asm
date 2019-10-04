@@ -7,7 +7,7 @@ SECTION .text
 jmp 0x07E0:START    
 
 TOTALSECTORCOUNT:   dw  0x02    
-
+KERNEL32SECTORCOUNT: dw 0x02 ; 보호모드 커널의 총 섹터수 
 START:
     mov ax, 0x07E0  
     mov ds, ax      
