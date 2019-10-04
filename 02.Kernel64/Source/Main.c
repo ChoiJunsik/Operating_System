@@ -8,8 +8,8 @@ void kPrintString( int iX, int iY, const char* pcString );
  */
 void Main( void )
 {
-    kPrintString( 0, 10, "Switch To IA-32e Mode Success~!!" );
-    kPrintString( 0, 11, "IA-32e C Language Kernel Start..............[Pass]" );
+    kPrintString( 0, 11, "Switch To IA-32e Mode Success~!!" );
+    kPrintString( 0, 12, "IA-32e C Language Kernel Start..............[Pass]" );
 }
 
 /**

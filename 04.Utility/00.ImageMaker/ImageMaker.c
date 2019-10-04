@@ -23,6 +23,7 @@ int main(int argc, char* argv[])
     int iTargetFd;
     int iBootLoaderSize;
     int iKernel32SectorCount;
+    int iKernel64SectorCount;
     int iSourceSize;
         
     // 커맨드 라인 옵션 검사
@@ -33,7 +34,7 @@ int main(int argc, char* argv[])
     }
     
     // Disk.img 파일을 생성
-    if( ( iTargetFd = open( "Disk.img", O_RDWR | O_CREAT |  O_TRUNC | S_IREAD | S_IWRITE ) ) == -1 )
+    if( ( iTargetFd = open( "Disk.img", O_RDWR | O_CREAT |  O_TRUNC |0, __S_IREAD | __S_IWRITE ) ) == -1 )
     {
         fprintf( stderr , "[ERROR] Disk.img open fail.\n" );
         exit( -1 );
@@ -77,7 +78,7 @@ int main(int argc, char* argv[])
     // 32비트 커널 파일을 열어서 모든 내용을 디스크 이미지 파일로 복사
     //--------------------------------------------------------------------------
     printf( "[INFO] Copy protected mode kernel to image file\n" );
-    if( ( iSourceFd = open( argv[ 3 ], O_RDONLY ) ) == -1 )
+    if( ( iSourceFd = open( argv[ 3 ], O_RDONLY|0 ) ) == -1 )
     {
         fprintf( stderr, "[ERROR] %s open fail\n", argv[ 3 ] );
         exit( -1 );
@@ -94,9 +95,9 @@ int main(int argc, char* argv[])
     // 64비트 커널 파일을 열어서 모든 내용을 디스크 이미지 파일로 복사
     //--------------------------------------------------------------------------
     printf( "[INFO] Copy IA-32e mode kernel to image file\n" );
-    if( ( iSourceFd = open( argv[ 4 ], O_RDONLY | O_BINARY ) ) == -1 )
+    if( ( iSourceFd = open( argv[ 4 ], O_RDONLY | 0) ) == -1 )
     {
-        fprintf( stderr, "[ERROR] %s open fail\n", argv[ 3 ] );
+        fprintf( stderr, "[ERROR] %s open fail\n", argv[ 4 ] );
         exit( -1 );
     }
 

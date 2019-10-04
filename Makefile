@@ -27,7 +27,7 @@ Kernel32:
 
 Kernel64:
 	@echo 
-	@echo ============== Build 32bit Kernel ===============
+	@echo ============== Build 64bit Kernel ===============
 	@echo 
 	
 	make -C 02.Kernel64
