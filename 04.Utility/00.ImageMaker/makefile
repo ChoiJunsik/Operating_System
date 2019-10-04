@@ -2,6 +2,6 @@ all: ImageMaker.exe
 
 ImageMaker.exe: ImageMaker.c
 	gcc -o $@ $<
-	mov ImageMaker.exe ../../
+	mv ImageMaker.exe ../../
 clean:
 	rm -f ImageMaker.exe
