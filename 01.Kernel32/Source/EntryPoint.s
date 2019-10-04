@@ -66,7 +66,7 @@ PROTECTEDMODE:
     
     ; 화면에 보호 모드로 전환되었다는 메시지를 찍는다.
     push ( SWITCHSUCCESSMESSAGE - $$ + 0x10000 )    ; 출력할 메시지의 어드레스르 스택에 삽입
-    push 3                                          ; 화면 Y 좌표(2)를 스택에 삽입
+    push 4                                          ; 화면 Y 좌표(2)를 스택에 삽입
     push 0                                          ; 화면 X 좌표(0)를 스택에 삽입
     call PRINTMESSAGE                               ; PRINTMESSAGE 함수 호출
     add esp, 12                                     ; 삽입한 파라미터 제거
