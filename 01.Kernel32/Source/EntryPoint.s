@@ -63,7 +63,8 @@ PROTECTEDMODE:
     mov ss, ax          ; SS 세그먼트 셀렉터에 설정
     mov esp, 0xFFFE     ; ESP 레지스터의 어드레스를 0xFFFE로 설정
     mov ebp, 0xFFFE     ; EBP 레지스터의 어드레스를 0xFFFE로 설정
-    
+
+
     ; 화면에 보호 모드로 전환되었다는 메시지를 찍는다.
     push ( SWITCHSUCCESSMESSAGE - $$ + 0x10000 )    ; 출력할 메시지의 어드레스르 스택에 삽입
     push 4                                          ; 화면 Y 좌표(2)를 스택에 삽입

@@ -133,7 +133,6 @@ READDATA:
     add byte [ TRACKNUMBER ], 0x01      
     jmp READDATA                        
 READEND:
-
     push LOADINGCOMPLETEMESSAGE     
     push 2                          
     push 20                         
