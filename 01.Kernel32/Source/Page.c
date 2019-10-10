@@ -42,12 +42,17 @@ void kInitializePageTables( void )
 	dwMappingAddress = 0;
 	for( i = 0 ; i < PAGE_MAXENTRYCOUNT * 64 ; i++ )
 	{
-		if(i==0 || i==5){
+		//Double Mapping
+		if(i==0){
 			kSetPageEntryData( &( pstPDEntry[ i ] ), 
 					0, 0x142000,
 					PAGE_FLAGS_DEFAULT, 0 );
 			dwMappingAddress += PAGE_DEFAULTSIZE;
 			continue;	
+		}else if(i==5){
+			kSetPageEntryData( &( pstPDEntry[ 5 ] ), 0, 0, PAGE_FLAGS_DEFAULT | PAGE_FLAGS_PS, 0 );
+			dwMappingAddress += PAGE_DEFAULTSIZE;
+			continue;
 		}
 		// 32비트로는 상위 어드레스를 표현할 수 없으므로, Mbyte 단위로 계산한 다음
 		// 최종 결과를 다시 4Kbyte로 나누어 32비트 이상의 어드레스를 계산함
