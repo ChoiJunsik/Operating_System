@@ -137,8 +137,13 @@ READEND:
     push 2                          
     push 20                         
     call PRINTMESSAGE               
-    add  sp, 6                      
-
+    add  sp, 6          
+    ;RAM SIZE PRINT            
+    push RAMSIZEMESSGE     
+    push 3                          
+    push 0                         
+    call PRINTMESSAGE               
+    add  sp, 6       
     jmp 0x1000:0x0000
 
 HANDLEDISKERROR:
@@ -204,7 +209,7 @@ MESSAGE1:    db 'MINT64 OS Boot Loader Start~!!', 0
 DISKERRORMESSAGE:       db  'DISK Error~!!', 0
 CURDATAMESSAGE1:       db  'Current Data:', 0
 CURDATAMESSAGE2:       db  '00/00/0000', 0
-
+RAMSIZEMESSGE:          db 'RAM Size: XX MB',0
 IMAGELOADINGMESSAGE:    db  'OS Image Loading...', 0
 LOADINGCOMPLETEMESSAGE: db  'Complete~!!', 0
 

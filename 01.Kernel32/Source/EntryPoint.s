@@ -3,6 +3,74 @@
 
 SECTION .text       ; text 섹션(세그먼트)을 정의
 
+ .do_e820:
+    mov di, 0x8004
+    xor ebx, ebx
+    mov edx, 0x0534D4150
+    mov eax, 0xe820
+    mov [es:di + 20], dword 1
+    mov ecx, 24
+    int 0x15
+    jc short .failed
+    mov edx, 0x0534D4150
+    cmp eax, edx
+    jne short .failed
+    test ebx, ebx
+    je short .failed
+    jmp short .jmpin
+ .e820lp:
+    mov eax, 0xe820
+    mov [es:di + 20], dword 1
+    mov ecx, 24
+    int 0x15
+    jc short .e820f
+    mov edx, 0x0534D4150
+ .jmpin:
+    jcxz .skipent
+    cmp cl, 20
+    jbe short .notext
+    test byte[es:di + 20], 1
+    je short .skipent
+ .notext:
+    mov ecx, dword[es:di + 8]
+    or ecx, dword[es:di + 12]
+    jz short .skipent
+    add ebp, dword[es:di + 8]
+ .skipent:
+    test ebx, ebx
+    jne short .e820lp
+ .e820f:
+    clc
+     jmp end
+ .failed:
+    stc
+
+ end:
+    mov ax, 0xB800
+    mov es, ax
+    shr ebp, 20 ;byte 단위를 Mbyte 단위로 변경
+
+
+    mov si, 500  ;출력포인터
+    ram_dividend equ 0x8200
+    mov dword[ram_dividend], 0x3B9ACA00
+
+    mov edi, 10
+    mov eax, ebp
+    mov edx, 0
+    div edi
+
+;출력문;
+    mov cx, ax
+    add cx, 48
+    mov ax, 0xB800
+    mov es, ax
+    mov byte [ es:si], cl
+    add si, 2
+    add dx, 48
+    mov byte[ es:si], dl
+
+    pop ebp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   코드 영역
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
