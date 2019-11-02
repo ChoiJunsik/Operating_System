@@ -19,6 +19,10 @@ SHELLCOMMANDENTRY gs_vstCommandTable[] =
         { "totalram", "Show Total RAM Size", kShowTotalRAMSize },
         { "strtod", "String To Decial/Hex Convert", kStringToDecimalHexTest },
         { "shutdown", "Shutdown And Reboot OS", kShutdown },
+        { "ypcholove", "Dummy1", ypchoLove },
+        { "ypchang", "Dummy2", ypchang },
+        { "ypkim", "Dummy3", ypkim },        
+        
 };                                     
 
 //==============================================================================
@@ -32,15 +36,19 @@ void kStartConsoleShell( void )
     char vcCommandBuffer[ CONSOLESHELL_MAXCOMMANDBUFFERCOUNT ];
     int iCommandBufferIndex = 0;
     BYTE bKey;
+    BOOL autoComplete=FALSE;
     int iCursorX, iCursorY;
-    
+    int iCount = sizeof( gs_vstCommandTable ) / sizeof( SHELLCOMMANDENTRY );
+
     // 프롬프트 출력
     kPrintf( CONSOLESHELL_PROMPTMESSAGE );
     
     while( 1 )
     {
         // 키가 수신될 때까지 대기
+        if(bKey==KEY_TAB) autoComplete=TRUE;
         bKey = kGetCh();
+        if(bKey!=KEY_TAB) autoComplete=FALSE;
         // Backspace 키 처리
         if( bKey == KEY_BACKSPACE )
         {
@@ -78,14 +86,34 @@ void kStartConsoleShell( void )
         {
             ;
         }
-        else
+        else if( bKey == KEY_TAB )
         {
-            // TAB은 공백으로 전환
-            if( bKey == KEY_TAB )
-            {
-                bKey = ' ';
+            if( autoComplete == TRUE ){
+                autoComplete = FALSE;
+                for(int i=0; i<iCount; ++i){
+                    if(kMemCmp(vcCommandBuffer,gs_vstCommandTable[i].pcCommand,iCommandBufferIndex) == 0){
+                        kPrintf("%s\n",gs_vstCommandTable[i].pcCommand);
+                    } 
+                }                
             }
-            
+            else{
+                int idx;
+                int idxCnt=0;
+                for(int i=0; i<iCount; ++i){
+                    if(kMemCmp(vcCommandBuffer,gs_vstCommandTable[i].pcCommand,iCommandBufferIndex) == 0){
+                        ++idxCnt;
+                        idx = i;
+                    } 
+                }
+                if(idxCnt == 1){
+                    for(char* j=gs_vstCommandTable[idx].pcCommand+iCommandBufferIndex; j!='\0' ;++j){
+                                kPrintf("%c",*j);
+                    }
+                }
+            }
+        }
+        else
+        {           
             // 버퍼에 공간이 남아있을 때만 가능
             if( iCommandBufferIndex < CONSOLESHELL_MAXCOMMANDBUFFERCOUNT )
             {
@@ -294,4 +322,14 @@ void kShutdown( const char* pcParamegerBuffer )
     kPrintf( "Press Any Key To Reboot PC..." );
     kGetCh();
     kReboot();
+}
+
+void ypchoLove(){
+    kPrintf( "We love ypcho!\n" );
+}
+void ypchang(){
+    kPrintf( "Who are you?\n" );
+}
+void ypkim(){
+    kPrintf( "Who are you!\n" );
 }
