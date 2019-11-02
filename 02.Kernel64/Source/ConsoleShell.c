@@ -116,6 +116,7 @@ void kStartConsoleShell( void )
                     kMemCpy(vcCommandBuffer,gs_vstCommandTable[idx].pcCommand,len);
                     iCommandBufferIndex = len;
                     kPrintf("%s",gs_vstCommandTable[idx].pcCommand);
+                    tabCnt=0;
                 }
             }
         }
@@ -335,7 +336,7 @@ void ypchoLove(){
     kPrintf( "We love ypcho!\n" );
 }
 void ypchang(){
-    kPrintf( "Who are you?\n" );
+    kPrintf( "Who are you?\n");
 }
 void ypkim(){
     kPrintf( "Who are you!\n" );
