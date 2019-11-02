@@ -3,7 +3,7 @@
  *  date    2009/01/24
  *  author  kkamagui 
  *          Copyright(c)2008 All rights reserved by kkamagui
- *  brief   ÀÎÅÍ·´Æ® ¹× ¿¹¿Ü ÇÚµé·¯¿¡ °ü·ÃµÈ Çì´õ ÆÄÀÏ
+ *  brief   ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµé·¯ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
  */
 
 #ifndef __INTERRUPTHANDLER_H__
@@ -13,11 +13,16 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// ÇÔ¼ö
+// ï¿½Ô¼ï¿½
 //
 ////////////////////////////////////////////////////////////////////////////////
 void kCommonExceptionHandler( int iVectorNumber, QWORD qwErrorCode );
 void kCommonInterruptHandler( int iVectorNumber );
 void kKeyboardHandler( int iVectorNumber );
+void kPageFault(QWORD addr,QWORD qwErrorCode);
+
+static inline void invlpg(void* m){
+    asm volatile("invlpg (%0)" ::"b"(m) : "memory");
+}
 
 #endif /*__INTERRUPTHANDLER_H__*/

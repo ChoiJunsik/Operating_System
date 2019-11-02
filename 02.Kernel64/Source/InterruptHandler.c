@@ -3,7 +3,7 @@
  *  date    2009/01/24
  *  author  kkamagui
  *          Copyright(c)2008 All rights reserved by kkamagui
- *  brief   ÀÎÅÍ·´Æ® ¹× ¿¹¿Ü ÇÚµé·¯¿¡ °ü·ÃµÈ ¼Ò½º ÆÄÀÏ
+ *  brief   ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµé·¯ï¿½ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½Ò½ï¿½ ï¿½ï¿½ï¿½ï¿½
  */
 
 #include "InterruptHandler.h"
@@ -12,13 +12,13 @@
 #include "Console.h"
 
 /**
- *  °øÅëÀ¸·Î »ç¿ëÇÏ´Â ¿¹¿Ü ÇÚµé·¯
+ *  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµé·¯
  */
 void kCommonExceptionHandler( int iVectorNumber, QWORD qwErrorCode )
 {
     char vcBuffer[ 3 ] = { 0, };
 
-    // ÀÎÅÍ·´Æ® º¤ÅÍ¸¦ È­¸é ¿À¸¥ÂÊ À§¿¡ 2ÀÚ¸® Á¤¼ö·Î Ãâ·Â
+    // ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½ï¿½ï¿½Í¸ï¿½ È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 2ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     vcBuffer[ 0 ] = '0' + iVectorNumber / 10;
     vcBuffer[ 1 ] = '0' + iVectorNumber % 10;
     
@@ -32,7 +32,7 @@ void kCommonExceptionHandler( int iVectorNumber, QWORD qwErrorCode )
 }
 
 /**
- *  °øÅëÀ¸·Î »ç¿ëÇÏ´Â ÀÎÅÍ·´Æ® ÇÚµé·¯
+ *  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½Úµé·¯
  */
 void kCommonInterruptHandler( int iVectorNumber )
 {
@@ -40,22 +40,22 @@ void kCommonInterruptHandler( int iVectorNumber )
     static int g_iCommonInterruptCount = 0;
 
     //=========================================================================
-    // ÀÎÅÍ·´Æ®°¡ ¹ß»ýÇßÀ½À» ¾Ë¸®·Á°í ¸Þ½ÃÁö¸¦ Ãâ·ÂÇÏ´Â ºÎºÐ
-    // ÀÎÅÍ·´Æ® º¤ÅÍ¸¦ È­¸é ¿À¸¥ÂÊ À§¿¡ 2ÀÚ¸® Á¤¼ö·Î Ãâ·Â
+    // ï¿½ï¿½ï¿½Í·ï¿½Æ®ï¿½ï¿½ ï¿½ß»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ë¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Îºï¿½
+    // ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½ï¿½ï¿½Í¸ï¿½ È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 2ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     vcBuffer[ 5 ] = '0' + iVectorNumber / 10;
     vcBuffer[ 6 ] = '0' + iVectorNumber % 10;
-    // ¹ß»ýÇÑ È½¼ö Ãâ·Â
+    // ï¿½ß»ï¿½ï¿½ï¿½ È½ï¿½ï¿½ ï¿½ï¿½ï¿½
     vcBuffer[ 8 ] = '0' + g_iCommonInterruptCount;
     g_iCommonInterruptCount = ( g_iCommonInterruptCount + 1 ) % 10;
     kPrintStringXY( 70, 0, vcBuffer );
     //=========================================================================
     
-    // EOI Àü¼Û
+    // EOI ï¿½ï¿½ï¿½ï¿½
     kSendEOIToPIC( iVectorNumber - PIC_IRQSTARTVECTOR );
 }
 
 /**
- *  Å°º¸µå ÀÎÅÍ·´Æ®ÀÇ ÇÚµé·¯
+ *  Å°ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Í·ï¿½Æ®ï¿½ï¿½ ï¿½Úµé·¯
  */
 void kKeyboardHandler( int iVectorNumber )
 {
@@ -64,23 +64,62 @@ void kKeyboardHandler( int iVectorNumber )
     BYTE bTemp;
 
     //=========================================================================
-    // ÀÎÅÍ·´Æ®°¡ ¹ß»ýÇßÀ½À» ¾Ë¸®·Á°í ¸Þ½ÃÁö¸¦ Ãâ·ÂÇÏ´Â ºÎºÐ
-    // ÀÎÅÍ·´Æ® º¤ÅÍ¸¦ È­¸é ¿ÞÂÊ À§¿¡ 2ÀÚ¸® Á¤¼ö·Î Ãâ·Â
+    // ï¿½ï¿½ï¿½Í·ï¿½Æ®ï¿½ï¿½ ï¿½ß»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ë¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Þ½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Îºï¿½
+    // ï¿½ï¿½ï¿½Í·ï¿½Æ® ï¿½ï¿½ï¿½Í¸ï¿½ È­ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ 2ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
     vcBuffer[ 5 ] = '0' + iVectorNumber / 10;
     vcBuffer[ 6 ] = '0' + iVectorNumber % 10;
-    // ¹ß»ýÇÑ È½¼ö Ãâ·Â
+    // ï¿½ß»ï¿½ï¿½ï¿½ È½ï¿½ï¿½ ï¿½ï¿½ï¿½
     vcBuffer[ 8 ] = '0' + g_iKeyboardInterruptCount;
     g_iKeyboardInterruptCount = ( g_iKeyboardInterruptCount + 1 ) % 10;
     kPrintStringXY( 0, 0, vcBuffer );
     //=========================================================================
 
-    // Å°º¸µå ÄÁÆ®·Ñ·¯¿¡¼­ µ¥ÀÌÅÍ¸¦ ÀÐ¾î¼­ ASCII·Î º¯È¯ÇÏ¿© Å¥¿¡ »ðÀÔ
+    // Å°ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½Ð¾î¼­ ASCIIï¿½ï¿½ ï¿½ï¿½È¯ï¿½Ï¿ï¿½ Å¥ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
     if( kIsOutputBufferFull() == TRUE )
     {
         bTemp = kGetKeyboardScanCode();
         kConvertScanCodeAndPutQueue( bTemp );
     }
 
-    // EOI Àü¼Û
+    // EOI ï¿½ï¿½ï¿½ï¿½
     kSendEOIToPIC( iVectorNumber - PIC_IRQSTARTVECTOR );
+}
+void kPageFault(QWORD addr,QWORD qwErrorCode){
+    char a[10];
+    kHexToString(addr,a);
+    QWORD pml4addr = kGetCr3();
+    DWORD tableOffset, directoryOffset, directoryPointerOffset, pml4Offset;
+    QWORD *tableEntry, *directoryEntry, *directoryPointerEntry, *pml4Entry;
+
+    tableOffset = (addr >> 12) & 0x1ff;
+    directoryOffset = (addr >> 21) & 0x1ff;
+    directoryPointerOffset = (addr >> 30) & 0x1ff;
+    pml4Offset = (addr >> 39) & 0x1ff;
+
+    pml4Entry = pml4addr + 8 * pml4Offset;
+    directoryPointerEntry = (*pml4Entry & 0xfffff000) + 8 * directoryPointerOffset;
+    directoryEntry = (*directoryPointerEntry & 0xfffff000) + 8 * directoryOffset;
+    tableEntry = (*directoryEntry & 0xfffff000) + 8 * tableOffset;
+
+    // protection fault
+    if(qwErrorCode){
+        *tableEntry |= 2;
+        invlpg(addr);
+        kPrintStringXY( 0, 0,"=========================================");
+        kPrintStringXY( 0, 1,"        Protection Fault Occur~!!!!      ");
+        kPrintStringXY( 0, 2, "                 Address: 0x                        " );
+        kPrintStringXY( 28, 2, a );
+        kPrintStringXY( 0, 3,"=========================================");    
+    }
+    // page fault
+    else{
+        *tableEntry |= 1;
+        invlpg(addr);
+        kPrintStringXY( 0, 0,"=========================================");
+        kPrintStringXY( 0, 1,"           Page Fault Occur~!!!!         ");
+        kPrintStringXY( 0, 2, "                 Address: 0x                         " );
+        kPrintStringXY( 28, 2, a );
+        kPrintStringXY( 0, 3,"=========================================");
+    }
+
 }

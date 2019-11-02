@@ -75,5 +75,6 @@ void kShutdown( const char* pcParamegerBuffer );
 void ypchoLove();
 void ypchang();
 void ypkim();
+void kRaiseFault();
 
 #endif /*__CONSOLESHELL_H__*/

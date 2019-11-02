@@ -22,7 +22,8 @@ SHELLCOMMANDENTRY gs_vstCommandTable[] =
         { "ypcholove", "Dummy1", ypchoLove },
         { "ypchang", "Dummy2", ypchang },
         { "ypkim", "Dummy3", ypkim },        
-        
+        { "raisefault", "0x1ff000 read or write", kRaiseFault},
+
 };                                     
 
 //==============================================================================
@@ -340,4 +341,11 @@ void ypchang(){
 }
 void ypkim(){
     kPrintf( "Who are you!\n" );
+}
+void kRaiseFault(){
+    QWORD* addr = 0x1FF000;
+    //write
+    *addr = 0x1994;
+    //read
+    // DWORD dummy = *addr;
 }

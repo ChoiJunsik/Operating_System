@@ -70,7 +70,7 @@ void kInitializePageTables( void )
 		if(dwMappingAddress == 0x1FF000){
 			kSetPageEntryData( &( pstPDEntry[ i ] ), 
 					0, dwMappingAddress, 
-					PAGE_FLAGS_P, 0 ); // READ ONLY
+					0, 0 ); // READ ONLY, Non-present
 			dwMappingAddress += 0x1000;
 			continue;
 		}
