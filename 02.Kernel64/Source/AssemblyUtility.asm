@@ -10,7 +10,7 @@ SECTION .text       ; text ����(���׸�Ʈ)�� ����
 
 ; C ���� ȣ���� �� �ֵ��� �̸��� ������(Export)
 global kInPortByte, kOutPortByte, kLoadGDTR, kLoadTR, kLoadIDTR
-global kEnableInterrupt, kDisableInterrupt, kReadRFLAGS,kGetCr3
+global kEnableInterrupt, kDisableInterrupt, kReadRFLAGS,kGetCr3,kGetCr2
 
 ; ��Ʈ�κ��� 1����Ʈ�� ����
 ;   PARAM: ��Ʈ ��ȣ
@@ -84,4 +84,7 @@ kReadRFLAGS:
     ret
 kGetCr3:
     mov rax,cr3
+    ret
+kGetCr2:
+    mov rax,cr2
     ret

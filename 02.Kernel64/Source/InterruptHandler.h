@@ -19,7 +19,7 @@
 void kCommonExceptionHandler( int iVectorNumber, QWORD qwErrorCode );
 void kCommonInterruptHandler( int iVectorNumber );
 void kKeyboardHandler( int iVectorNumber );
-void kPageFault(QWORD addr,QWORD qwErrorCode);
+void kPageFault(int iVectorNumber,QWORD qwErrorCode);
 
 static inline void invlpg(void* m){
     asm volatile("invlpg (%0)" ::"b"(m) : "memory");

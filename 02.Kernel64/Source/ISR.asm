@@ -261,7 +261,7 @@ kISRPageFault:
     KSAVECONTEXT    ; ���ؽ�Ʈ�� ������ �� �����͸� Ŀ�� ������ ��ũ���ͷ� ��ü
 
     ; �ڵ鷯�� ���� ��ȣ�� ���� �ڵ带 �����ϰ� �ڵ鷯 ȣ��
-    mov rdi, cr2
+    mov rdi, 14
     mov rsi, qword [ rbp + 8 ]
     call kPageFault
 
