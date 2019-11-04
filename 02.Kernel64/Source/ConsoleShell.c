@@ -1,7 +1,7 @@
 /**
  *  file    ConsoleShell.c
  *  date    2009/01/31
- *  author  kkamagui 
+ *  author  kkamagui
  *          Copyright(c)2008 All rights reserved by kkamagui
  *  brief   �ܼ� �п� ���õ� �ҽ� ����
  */
@@ -21,10 +21,10 @@ SHELLCOMMANDENTRY gs_vstCommandTable[] =
         { "shutdown", "Shutdown And Reboot OS", kShutdown },
         { "ypcholove", "Dummy1", ypchoLove },
         { "ypchang", "Dummy2", ypchang },
-        { "ypkim", "Dummy3", ypkim },        
+        { "ypkim", "Dummy3", ypkim },
         { "raisefault", "0x1ff000 read or write", kRaiseFault},
 
-};                                     
+};
 
 //==============================================================================
 //  ���� ���� �����ϴ� �ڵ�
@@ -61,7 +61,7 @@ void kStartConsoleShell( void )
         {
             if( iCommandBufferIndex > 0 )
             {
-                // ���� Ŀ�� ��ġ�� �� �� ���� ������ �̵��� ���� ������ ����ϰ� 
+                // ���� Ŀ�� ��ġ�� �� �� ���� ������ �̵��� ���� ������ ����ϰ�
                 // Ŀ�ǵ� ���ۿ��� ������ ���� ����
                 kGetCursor( &iCursorX, &iCursorY );
                 kPrintStringXY( iCursorX - 1, iCursorY, " " );
@@ -73,16 +73,28 @@ void kStartConsoleShell( void )
         else if( bKey == KEY_ENTER )
         {
             kPrintf( "\n" );
-            
+
             if( iCommandBufferIndex > 0 )
             {
                 // Ŀ�ǵ� ���ۿ� �ִ� ������ ����
                 vcCommandBuffer[ iCommandBufferIndex ] = '\0';
+                count = -1;
+                hishead++;
+                hisfull++;
+                if(hishead > 9)
+                  hishead = 0;
+
+                hiscur = hishead + 1;
+                int len = kStrLen(vcCommandBuffer);
+                kMemSet(history[hishead], '\0', CONSOLESHELL_MAXCOMMANDBUFFERCOUNT);
+                for(int i = 0; i < len; i++){
+                  history[hishead][i] = vcCommandBuffer[i];
+                }
                 kExecuteCommand( vcCommandBuffer );
             }
-            
+
             // ������Ʈ ��� �� Ŀ�ǵ� ���� �ʱ�ȭ
-            kPrintf( "%s", CONSOLESHELL_PROMPTMESSAGE );            
+            kPrintf( "%s", CONSOLESHELL_PROMPTMESSAGE );
             kMemSet( vcCommandBuffer, '\0', CONSOLESHELL_MAXCOMMANDBUFFERCOUNT );
             iCommandBufferIndex = 0;
         }
@@ -172,8 +184,7 @@ void kStartConsoleShell( void )
 
 
 
-        }        
-        else if( bKey == KEY_TAB )
+        }else if( bKey == KEY_TAB )
         {
             ++tabCnt;
             if( tabCnt==2 ){
@@ -182,9 +193,9 @@ void kStartConsoleShell( void )
                 for(int i=0; i<iCount; ++i){
                     if(kMemCmp(vcCommandBuffer,gs_vstCommandTable[i].pcCommand,iCommandBufferIndex) == 0){
                         kPrintf("%s\n",gs_vstCommandTable[i].pcCommand);
-                    } 
+                    }
                 }
-                kPrintf( "%s", CONSOLESHELL_PROMPTMESSAGE );            
+                kPrintf( "%s", CONSOLESHELL_PROMPTMESSAGE );
                 kMemSet( vcCommandBuffer, '\0', CONSOLESHELL_MAXCOMMANDBUFFERCOUNT );
                 iCommandBufferIndex = 0;
             }
@@ -195,7 +206,7 @@ void kStartConsoleShell( void )
                     if(kMemCmp(vcCommandBuffer,gs_vstCommandTable[i].pcCommand,iCommandBufferIndex) == 0){
                         ++idxCnt;
                         idx = i;
-                    } 
+                    }
                 }
                 if(idxCnt == 1){
                     int len = kStrLen(gs_vstCommandTable[idx].pcCommand);
@@ -209,7 +220,7 @@ void kStartConsoleShell( void )
             }
         }
         else
-        {           
+        {
             // ���ۿ� ������ �������� ���� ����
             if( iCommandBufferIndex < CONSOLESHELL_MAXCOMMANDBUFFERCOUNT )
             {
@@ -228,7 +239,7 @@ void kExecuteCommand( const char* pcCommandBuffer )
     int i, iSpaceIndex;
     int iCommandBufferLength, iCommandLength;
     int iCount;
-    
+
     // �������� ���е� Ŀ�ǵ带 ����
     iCommandBufferLength = kStrLen( pcCommandBuffer );
     for( iSpaceIndex = 0 ; iSpaceIndex < iCommandBufferLength ; iSpaceIndex++ )
@@ -238,7 +249,7 @@ void kExecuteCommand( const char* pcCommandBuffer )
             break;
         }
     }
-    
+
     // Ŀ�ǵ� ���̺��� �˻��ؼ� ������ �̸��� Ŀ�ǵ尡 �ִ��� Ȯ��
     iCount = sizeof( gs_vstCommandTable ) / sizeof( SHELLCOMMANDENTRY );
     for( i = 0 ; i < iCount ; i++ )
@@ -284,7 +295,7 @@ int kGetNextParameter( PARAMETERLIST* pstList, char* pcParameter )
     {
         return 0;
     }
-    
+
     // ������ ���̸�ŭ �̵��ϸ鼭 ������ �˻�
     for( i = pstList->iCurrentPosition ; i < pstList->iLength ; i++ )
     {
@@ -293,7 +304,7 @@ int kGetNextParameter( PARAMETERLIST* pstList, char* pcParameter )
             break;
         }
     }
-    
+
     // �Ķ���͸� �����ϰ� ���̸� ��ȯ
     kMemCpy( pcParameter, pstList->pcBuffer + pstList->iCurrentPosition, i );
     iLength = i - pstList->iCurrentPosition;
@@ -303,7 +314,7 @@ int kGetNextParameter( PARAMETERLIST* pstList, char* pcParameter )
     pstList->iCurrentPosition += iLength + 1;
     return iLength;
 }
-    
+
 //==============================================================================
 //  Ŀ�ǵ带 ó���ϴ� �ڵ�
 //==============================================================================
@@ -316,12 +327,12 @@ void kHelp( const char* pcCommandBuffer )
     int iCount;
     int iCursorX, iCursorY;
     int iLength, iMaxCommandLength = 0;
-    
-    
+
+
     kPrintf( "=========================================================\n" );
     kPrintf( "                    MINT64 Shell Help                    \n" );
     kPrintf( "=========================================================\n" );
-    
+
     iCount = sizeof( gs_vstCommandTable ) / sizeof( SHELLCOMMANDENTRY );
 
     // ���� �� Ŀ�ǵ��� ���̸� ���
@@ -333,7 +344,7 @@ void kHelp( const char* pcCommandBuffer )
             iMaxCommandLength = iLength;
         }
     }
-    
+
     // ���� ���
     for( i = 0 ; i < iCount ; i++ )
     {
@@ -345,7 +356,7 @@ void kHelp( const char* pcCommandBuffer )
 }
 
 /**
- *  ȭ���� ���� 
+ *  ȭ���� ����
  */
 void kCls( const char* pcParameterBuffer )
 {
@@ -372,10 +383,10 @@ void kStringToDecimalHexTest( const char* pcParameterBuffer )
     PARAMETERLIST stList;
     int iCount = 0;
     long lValue;
-    
+
     // �Ķ���� �ʱ�ȭ
     kInitializeParameter( &stList, pcParameterBuffer );
-    
+
     while( 1 )
     {
         // ���� �Ķ���͸� ����, �Ķ������ ���̰� 0�̸� �Ķ���Ͱ� ���� ���̹Ƿ�
@@ -388,7 +399,7 @@ void kStringToDecimalHexTest( const char* pcParameterBuffer )
 
         // �Ķ���Ϳ� ���� ������ ����ϰ� 16�������� 10�������� �Ǵ��Ͽ� ��ȯ�� ��
         // ����� printf�� ���
-        kPrintf( "Param %d = '%s', Length = %d, ", iCount + 1, 
+        kPrintf( "Param %d = '%s', Length = %d, ", iCount + 1,
                  vcParameter, iLength );
 
         // 0x�� �����ϸ� 16����, �׿ܴ� 10������ �Ǵ�
@@ -402,7 +413,7 @@ void kStringToDecimalHexTest( const char* pcParameterBuffer )
             lValue = kAToI( vcParameter, 10 );
             kPrintf( "Decimal Value = %d\n", lValue );
         }
-        
+
         iCount++;
     }
 }
@@ -413,7 +424,7 @@ void kStringToDecimalHexTest( const char* pcParameterBuffer )
 void kShutdown( const char* pcParamegerBuffer )
 {
     kPrintf( "System Shutdown Start...\n" );
-    
+
     // Ű���� ��Ʈ�ѷ��� ���� PC�� �����
     kPrintf( "Press Any Key To Reboot PC..." );
     kGetCh();
