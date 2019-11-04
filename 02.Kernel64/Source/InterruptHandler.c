@@ -85,8 +85,6 @@ void kKeyboardHandler( int iVectorNumber )
     kSendEOIToPIC( iVectorNumber - PIC_IRQSTARTVECTOR );
 }
 void kPageFault(QWORD addr,QWORD qwErrorCode){
-    char a[10];
-    kHexToString(addr,a);
     QWORD pml4addr = kGetCr3();
     DWORD tableOffset, directoryOffset, directoryPointerOffset, pml4Offset;
     QWORD *tableEntry, *directoryEntry, *directoryPointerEntry, *pml4Entry;
@@ -104,22 +102,19 @@ void kPageFault(QWORD addr,QWORD qwErrorCode){
     // protection fault
     if(qwErrorCode){
         *tableEntry |= 2;
-        invlpg(addr);
-        kPrintStringXY( 0, 0,"=========================================");
-        kPrintStringXY( 0, 1,"        Protection Fault Occur~!!!!      ");
-        kPrintStringXY( 0, 2, "                 Address: 0x                        " );
-        kPrintStringXY( 28, 2, a );
-        kPrintStringXY( 0, 3,"=========================================");    
+        kPrintf("=========================================\n");
+        kPrintf("           Page Fault Occur~!!!!         \n");
+        kPrintf("           Address: 0x%q\n", addr);
+        kPrintf("=========================================\n");
+         
     }
     // page fault
     else{
         *tableEntry |= 1;
-        invlpg(addr);
-        kPrintStringXY( 0, 0,"=========================================");
-        kPrintStringXY( 0, 1,"           Page Fault Occur~!!!!         ");
-        kPrintStringXY( 0, 2, "                 Address: 0x                         " );
-        kPrintStringXY( 28, 2, a );
-        kPrintStringXY( 0, 3,"=========================================");
+        kPrintf("=========================================\n");
+        kPrintf("        Protection Fault Occur~!!!!      \n");
+        kPrintf("           Address: 0x%q\n", addr);
+        kPrintf("=========================================\n");
     }
-
+        invlpg(addr);
 }
