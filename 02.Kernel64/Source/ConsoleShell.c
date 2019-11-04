@@ -41,9 +41,16 @@ void kStartConsoleShell( void )
     int iCursorX, iCursorY;
     int iCount = sizeof( gs_vstCommandTable ) / sizeof( SHELLCOMMANDENTRY );
 
+    int hishead = -1;   // head index num
+    int hiscur; // index with up down keyboard input
+    char history[10][300];
+    int hisfull = 0;
+    int cursorFirst;
+    int count = -1;
     // ������Ʈ ���
     kPrintf( CONSOLESHELL_PROMPTMESSAGE );
-    
+    kGetCursor(&iCursorX, &iCursorY);
+    cursorFirst = iCursorX;
     while( 1 )
     {
         // Ű�� ���ŵ� ������ ���
@@ -86,6 +93,86 @@ void kStartConsoleShell( void )
         {
             ;
         }
+        else if( bKey == KEY_UP ){
+
+          if(hisfull > 10)
+            hisfull = 10;
+
+          if(count+1 == hisfull){ //queue is not full &&
+            ;
+          }else{
+
+          count++;
+          hiscur--;
+
+          if(hiscur <= -1 && hisfull == 10){
+            hiscur = 9;
+          }
+
+          kGetCursor( &iCursorX, &iCursorY );
+
+          for(int i = cursorFirst; i < iCursorX; i++)
+            kPrintStringXY( i, iCursorY, " " );
+
+          kMemSet( vcCommandBuffer, '\0', CONSOLESHELL_MAXCOMMANDBUFFERCOUNT );
+          iCommandBufferIndex = 0;
+
+          iCommandBufferIndex = kStrLen(history[hiscur]);
+
+          for(int i = 0; i < iCommandBufferIndex; i++){
+            vcCommandBuffer[i] = history[hiscur][i];
+          }
+
+        kGetCursor( &iCursorX, &iCursorY );
+        kPrintStringXY( cursorFirst, iCursorY, history[hiscur]);
+        kSetCursor( cursorFirst + iCommandBufferIndex, iCursorY );
+          }
+
+        }else if( bKey == KEY_DOWN){
+
+          if(hisfull > 10)
+            hisfull = 10;
+          if(count ==  -1){
+            ;
+          }else if(count == 0){
+
+            hiscur++;
+            count--;
+            kGetCursor( &iCursorX, &iCursorY );
+            for(int i = cursorFirst; i < iCursorX; i++)
+              kPrintStringXY( i, iCursorY, " " );
+            kSetCursor( cursorFirst, iCursorY );
+            kMemSet( vcCommandBuffer, '\0', CONSOLESHELL_MAXCOMMANDBUFFERCOUNT );
+            iCommandBufferIndex = 0;
+          }else{
+
+            hiscur++;
+            count--;
+
+            if(hiscur >= 10 && hisfull == 10){
+              hiscur = 0;
+            }
+
+            kGetCursor( &iCursorX, &iCursorY );
+            for(int i = cursorFirst; i < iCursorX; i++)
+              kPrintStringXY( i, iCursorY, " " );
+
+            kMemSet( vcCommandBuffer, '\0', CONSOLESHELL_MAXCOMMANDBUFFERCOUNT );
+            iCommandBufferIndex = 0;
+
+            iCommandBufferIndex = kStrLen(history[hiscur]);
+            for(int i = 0; i < iCommandBufferIndex; i++){
+              vcCommandBuffer[i] = history[hiscur][i];
+            }
+
+            kGetCursor( &iCursorX, &iCursorY );
+            kPrintStringXY( cursorFirst, iCursorY, history[hiscur]);
+            kSetCursor( cursorFirst + iCommandBufferIndex, iCursorY );
+          }
+
+
+
+        }        
         else if( bKey == KEY_TAB )
         {
             ++tabCnt;
