@@ -76,5 +76,10 @@ void ypchoLove();
 void ypchang();
 void ypkim();
 void kRaiseFault();
+void kSetTimer( const char* pcParameterBuffer );
+void kWaitUsingPIT( const char* pcParameterBuffer );
+void kReadTimeStampCounter( const char* pcParameterBuffer );
+void kMeasureProcessorSpeed( const char* pcParameterBuffer );
+void kShowDateAndTime( const char* pcParameterBuffer );
 
 #endif /*__CONSOLESHELL_H__*/

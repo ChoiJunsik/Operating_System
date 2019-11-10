@@ -11,6 +11,7 @@ SECTION .text       ; text ����(���׸�Ʈ)�� ����
 ; C ���� ȣ���� �� �ֵ��� �̸��� ������(Export)
 global kInPortByte, kOutPortByte, kLoadGDTR, kLoadTR, kLoadIDTR
 global kEnableInterrupt, kDisableInterrupt, kReadRFLAGS,kGetCr3,kGetCr2
+global kReadTSC
 
 ; ��Ʈ�κ��� 1����Ʈ�� ����
 ;   PARAM: ��Ʈ ��ȣ
@@ -87,4 +88,17 @@ kGetCr3:
     ret
 kGetCr2:
     mov rax,cr2
+    ret
+; Ÿ�� ������ ī���͸� �о ��ȯ 
+;   PARAM: ����    
+kReadTSC:
+    push rdx                ; RDX �������͸� ���ÿ� ����
+    
+    rdtsc                   ; Ÿ�� ������ ī���͸� �о RDX:RAX�� ����
+    
+    shl rdx, 32             ; RDX �������Ϳ� �ִ� ���� 32��Ʈ TSC ���� RAX �������Ϳ�
+    or rax, rdx             ; �ִ� ���� 32��Ʈ TSC ���� OR�Ͽ� RAX �������Ϳ� 64��Ʈ 
+                            ; TSC ���� ����
+    
+    pop rdx
     ret

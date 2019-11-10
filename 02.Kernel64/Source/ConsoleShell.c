@@ -10,7 +10,9 @@
 #include "Console.h"
 #include "Keyboard.h"
 #include "Utility.h"
-
+#include "PIT.h"
+#include "RTC.h"
+#include "AssemblyUtility.h"
 // Ŀ�ǵ� ���̺� ����
 SHELLCOMMANDENTRY gs_vstCommandTable[] =
 {
@@ -23,6 +25,12 @@ SHELLCOMMANDENTRY gs_vstCommandTable[] =
         { "ypchang", "Dummy2", ypchang },
         { "ypkim", "Dummy3", ypkim },
         { "raisefault", "0x1ff000 read or write", kRaiseFault},
+        { "settimer", "Set PIT Controller Counter0, ex)settimer 10(ms) 1(periodic)", 
+                kSetTimer },
+        { "wait", "Wait ms Using PIT, ex)wait 100(ms)", kWaitUsingPIT },
+        { "rdtsc", "Read Time Stamp Counter", kReadTimeStampCounter },
+        { "cpuspeed", "Measure Processor Speed", kMeasureProcessorSpeed },
+        { "date", "Show Date And Time", kShowDateAndTime },
 
 };
 
@@ -446,4 +454,128 @@ void kRaiseFault(){
     *addr = 0x1994;
     //read
     // DWORD dummy = *addr;
+}
+/**
+ *  PIT ��Ʈ�ѷ��� ī���� 0 ����
+ */
+void kSetTimer( const char* pcParameterBuffer )
+{
+    char vcParameter[ 100 ];
+    PARAMETERLIST stList;
+    long lValue;
+    BOOL bPeriodic;
+
+    // �Ķ���� �ʱ�ȭ
+    kInitializeParameter( &stList, pcParameterBuffer );
+    
+    // milisecond ����
+    if( kGetNextParameter( &stList, vcParameter ) == 0 )
+    {
+        kPrintf( "ex)settimer 10(ms) 1(periodic)\n" );
+        return ;
+    }
+    lValue = kAToI( vcParameter, 10 );
+
+    // Periodic ����
+    if( kGetNextParameter( &stList, vcParameter ) == 0 )
+    {
+        kPrintf( "ex)settimer 10(ms) 1(periodic)\n" );
+        return ;
+    }    
+    bPeriodic = kAToI( vcParameter, 10 );
+    
+    kInitializePIT( MSTOCOUNT( lValue ), bPeriodic );
+    kPrintf( "Time = %d ms, Periodic = %d Change Complete\n", lValue, bPeriodic );
+}
+
+/**
+ *  PIT ��Ʈ�ѷ��� ���� ����Ͽ� ms ���� ���  
+ */
+void kWaitUsingPIT( const char* pcParameterBuffer )
+{
+    char vcParameter[ 100 ];
+    int iLength;
+    PARAMETERLIST stList;
+    long lMillisecond;
+    int i;
+    
+    // �Ķ���� �ʱ�ȭ
+    kInitializeParameter( &stList, pcParameterBuffer );
+    if( kGetNextParameter( &stList, vcParameter ) == 0 )
+    {
+        kPrintf( "ex)wait 100(ms)\n" );
+        return ;
+    }
+    
+    lMillisecond = kAToI( pcParameterBuffer, 10 );
+    kPrintf( "%d ms Sleep Start...\n", lMillisecond );
+    
+    // ���ͷ�Ʈ�� ��Ȱ��ȭ�ϰ� PIT ��Ʈ�ѷ��� ���� ���� �ð��� ����
+    kDisableInterrupt();
+    for( i = 0 ; i < lMillisecond / 30 ; i++ )
+    {
+        kWaitUsingDirectPIT( MSTOCOUNT( 30 ) );
+    }
+    kWaitUsingDirectPIT( MSTOCOUNT( lMillisecond % 30 ) );   
+    kEnableInterrupt();
+    kPrintf( "%d ms Sleep Complete\n", lMillisecond );
+    
+    // Ÿ�̸� ����
+    kInitializePIT( MSTOCOUNT( 1 ), TRUE );
+}
+
+/**
+ *  Ÿ�� ������ ī���͸� ����  
+ */
+void kReadTimeStampCounter( const char* pcParameterBuffer )
+{
+    QWORD qwTSC;
+    
+    qwTSC = kReadTSC();
+    kPrintf( "Time Stamp Counter = %q\n", qwTSC );
+}
+
+/**
+ *  ���μ����� �ӵ��� ����
+ */
+void kMeasureProcessorSpeed( const char* pcParameterBuffer )
+{
+    int i;
+    QWORD qwLastTSC, qwTotalTSC = 0;
+        
+    kPrintf( "Now Measuring." );
+    
+    // 10�� ���� ��ȭ�� Ÿ�� ������ ī���͸� �̿��Ͽ� ���μ����� �ӵ��� ���������� ����
+    kDisableInterrupt();    
+    for( i = 0 ; i < 200 ; i++ )
+    {
+        qwLastTSC = kReadTSC();
+        kWaitUsingDirectPIT( MSTOCOUNT( 50 ) );
+        qwTotalTSC += kReadTSC() - qwLastTSC;
+
+        kPrintf( "." );
+    }
+    // Ÿ�̸� ����
+    kInitializePIT( MSTOCOUNT( 1 ), TRUE );    
+    kEnableInterrupt();
+    
+    kPrintf( "\nCPU Speed = %d MHz\n", qwTotalTSC / 10 / 1000 / 1000 );
+}
+
+/**
+ *  RTC ��Ʈ�ѷ��� ����� ���� �� �ð� ������ ǥ��
+ */
+void kShowDateAndTime( const char* pcParameterBuffer )
+{
+    BYTE bSecond, bMinute, bHour;
+    BYTE bDayOfWeek, bDayOfMonth, bMonth;
+    WORD wYear;
+
+    // RTC ��Ʈ�ѷ����� �ð� �� ���ڸ� ����
+    kReadRTCTime( &bHour, &bMinute, &bSecond );
+    kReadRTCDate( &wYear, &bMonth, &bDayOfMonth, &bDayOfWeek );
+    
+    kPrintf( "Date: %d/%d/%d %s, ", wYear, bMonth, bDayOfMonth,
+             kConvertDayOfWeekToString( bDayOfWeek ) );
+    kPrintf( "Time: %d:%d:%d\n", bHour, bMinute, bSecond );
 }

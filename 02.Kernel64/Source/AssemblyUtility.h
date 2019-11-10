@@ -24,6 +24,8 @@ void kLoadIDTR( QWORD qwIDTRAddress);
 void kEnableInterrupt( void );
 void kDisableInterrupt( void );
 void kGetCr3(void);
+void kGetCr2(void);
 QWORD kReadRFLAGS( void );
+QWORD kReadTSC( void );
 
 #endif /*__ASSEMBLYUTILITY_H__*/
