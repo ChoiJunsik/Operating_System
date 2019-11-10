@@ -31,6 +31,7 @@ SHELLCOMMANDENTRY gs_vstCommandTable[] =
         { "rdtsc", "Read Time Stamp Counter", kReadTimeStampCounter },
         { "cpuspeed", "Measure Processor Speed", kMeasureProcessorSpeed },
         { "date", "Show Date And Time", kShowDateAndTime },
+        { "createtask", "Create Task", kCreateTestTask },
 
 };
 
@@ -578,4 +579,53 @@ void kShowDateAndTime( const char* pcParameterBuffer )
     kPrintf( "Date: %d/%d/%d %s, ", wYear, bMonth, bDayOfMonth,
              kConvertDayOfWeekToString( bDayOfWeek ) );
     kPrintf( "Time: %d:%d:%d\n", bHour, bMinute, bSecond );
+}
+// TCB 자료구조와 스택 정의
+static TCB gs_vstTask[ 2 ] = { 0, };
+static QWORD gs_vstStack[ 1024 ] = { 0, };
+
+/**
+ *  태스크 전환을 테스트하는 태스크
+ */
+void kTestTask( void )
+{
+    int i = 0;
+    
+    while( 1 )
+    {
+        // 메시지를 출력하고 키 입력을 대기
+        kPrintf( "[%d] This message is from kTestTask. Press any key to switch "
+                 "kConsoleShell~!!\n", i++ );
+        kGetCh();
+        
+        // 위에서 키가 입력되면 태스크를 전환
+        kSwitchContext( &( gs_vstTask[ 1 ].stContext ), &( gs_vstTask[ 0 ].stContext ) );
+    }
+}
+
+/**
+ *  태스크를 생성해서 멀티 태스킹 수행
+ */
+void kCreateTestTask( const char* pcParameterBuffer )
+{
+    KEYDATA stData;
+    int i = 0;
+    
+    // 태스크 설정
+    kSetUpTask( &( gs_vstTask[ 1 ] ), 1, 0, ( QWORD ) kTestTask, &( gs_vstStack ), 
+                sizeof( gs_vstStack ) );
+    
+    // 'q' 키가 입력되지 않을 때까지 수행
+    while( 1 )
+    {
+        // 메시지를 출력하고 키 입력을 대기
+        kPrintf( "[%d] This message is from kConsoleShell. Press any key to "
+                 "switch TestTask~!!\n", i++ );
+        if( kGetCh() == 'q' )
+        {
+            break;
+        }
+        // 위에서 키가 입력되면 태스크를 전환
+        kSwitchContext( &( gs_vstTask[ 0 ].stContext ), &( gs_vstTask[ 1 ].stContext ) );
+    }
 }
