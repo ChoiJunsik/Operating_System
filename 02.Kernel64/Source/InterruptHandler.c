@@ -11,6 +11,10 @@
 #include "Keyboard.h"
 #include "Console.h"
 #include "../../01.Kernel32/Source/Page.h"
+#include "Utility.h"
+#include "Task.h"
+#include "Descriptor.h"
+
 /**
  *  �������� ����ϴ� ���� �ڵ鷯
  */
@@ -115,4 +119,34 @@ void kPageFault(int iVectorNumber,QWORD qwErrorCode){
         kPrintf("=========================================\n");
     }
     invlpg(addr);
+}
+void kTimerHandler( int iVectorNumber )
+{
+    char vcBuffer[] = "[INT:  , ]";
+    static int g_iTimerInterruptCount = 0;
+
+    //=========================================================================
+    // ���ͷ�Ʈ�� �߻������� �˸����� �޽����� ����ϴ� �κ�
+    // ���ͷ�Ʈ ���͸� ȭ�� ������ ���� 2�ڸ� ������ ���
+    vcBuffer[ 5 ] = '0' + iVectorNumber / 10;
+    vcBuffer[ 6 ] = '0' + iVectorNumber % 10;
+    // �߻��� Ƚ�� ���
+    vcBuffer[ 8 ] = '0' + g_iTimerInterruptCount;
+    g_iTimerInterruptCount = ( g_iTimerInterruptCount + 1 ) % 10;
+    kPrintStringXY( 70, 0, vcBuffer );
+    //=========================================================================
+    
+    // EOI ����
+    kSendEOIToPIC( iVectorNumber - PIC_IRQSTARTVECTOR );
+
+    // Ÿ�̸� �߻� Ƚ���� ����
+    g_qwTickCount++;
+
+    // �½�ũ�� ����� ���μ����� �ð��� ����
+    kDecreaseProcessorTime();
+    // ���μ����� ����� �� �ִ� �ð��� �� ��ٸ� �½�ũ ��ȯ ����
+    if( kIsProcessorTimeExpired() == TRUE )
+    {
+        kScheduleInInterrupt();
+    }
 }

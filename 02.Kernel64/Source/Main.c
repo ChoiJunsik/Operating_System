@@ -4,6 +4,9 @@
 #include "PIC.h"
 #include "Console.h"
 #include "ConsoleShell.h"
+#include "Task.h"
+#include "PIT.h"
+
 // 함수 선언
 void kPrintString( int iX, int iY, const char* pcString );
 BOOL canRead(DWORD* addr);
@@ -44,7 +47,13 @@ void Main( void )
     kCheckTotalRAMSize();
     kSetCursor( 45, iCursorY++ );
     kPrintf( "Pass], Size = %d MB\n", kGetTotalRAMSize() );
-    
+
+    kPrintf( "TCB Pool And Scheduler Initialize...........[Pass]\n" );
+    iCursorY++;
+    kInitializeScheduler();
+    // 1ms�� �ѹ��� ���ͷ�Ʈ�� �߻��ϵ��� ����
+    kInitializePIT( MSTOCOUNT( 1 ), 1 );
+        
     kPrintf( "Keyboard Activate And Queue Initialize......[    ]" );
     // 키보드를 활성화
     if( kInitializeKeyboard() == TRUE )

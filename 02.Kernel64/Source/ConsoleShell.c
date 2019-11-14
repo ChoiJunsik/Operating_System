@@ -31,7 +31,7 @@ SHELLCOMMANDENTRY gs_vstCommandTable[] =
         { "rdtsc", "Read Time Stamp Counter", kReadTimeStampCounter },
         { "cpuspeed", "Measure Processor Speed", kMeasureProcessorSpeed },
         { "date", "Show Date And Time", kShowDateAndTime },
-        { "createtask", "Create Task", kCreateTestTask },
+        { "createtask", "Create Task, ex)createtask 1(type) 10(count)", kCreateTestTask },
 
 };
 
@@ -602,30 +602,138 @@ void kTestTask( void )
         kSwitchContext( &( gs_vstTask[ 1 ].stContext ), &( gs_vstTask[ 0 ].stContext ) );
     }
 }
+void kTestTask1( void )
+{
+    BYTE bData;
+    int i = 0, iX = 0, iY = 0, iMargin;
+    CHARACTER* pstScreen = ( CHARACTER* ) CONSOLE_VIDEOMEMORYADDRESS;
+    TCB* pstRunningTask;
+    
+    // �ڽ��� ID�� �� ȭ�� ���������� ���
+    pstRunningTask = kGetRunningTask();
+    iMargin = ( pstRunningTask->stLink.qwID & 0xFFFFFFFF ) % 10;
+    
+    // ȭ�� �� �����̸� ���鼭 ���� ���
+    while( 1 )
+    {
+        switch( i )
+        {
+        case 0:
+            iX++;
+            if( iX >= ( CONSOLE_WIDTH - iMargin ) )
+            {
+                i = 1;
+            }
+            break;
+            
+        case 1:
+            iY++;
+            if( iY >= ( CONSOLE_HEIGHT - iMargin ) )
+            {
+                i = 2;
+            }
+            break;
+            
+        case 2:
+            iX--;
+            if( iX < iMargin )
+            {
+                i = 3;
+            }
+            break;
+            
+        case 3:
+            iY--;
+            if( iY < iMargin )
+            {
+                i = 0;
+            }
+            break;
+        }
+        
+        // ���� �� ���� ����
+        pstScreen[ iY * CONSOLE_WIDTH + iX ].bCharactor = bData;
+        pstScreen[ iY * CONSOLE_WIDTH + iX ].bAttribute = bData & 0x0F;
+        bData++;
+        
+        // �ٸ� �½�ũ�� ��ȯ
+        kSchedule();
+    }
+}
 
 /**
- *  태스크를 생성해서 멀티 태스킹 수행
+ *  �½�ũ 2
+ *      �ڽ��� ID�� �����Ͽ� Ư�� ��ġ�� ȸ���ϴ� �ٶ����� ���
+ */
+void kTestTask2( void )
+{
+    int i = 0, iOffset;
+    CHARACTER* pstScreen = ( CHARACTER* ) CONSOLE_VIDEOMEMORYADDRESS;
+    TCB* pstRunningTask;
+    char vcData[ 4 ] = { '-', '\\', '|', '/' };
+    
+    // �ڽ��� ID�� �� ȭ�� ���������� ���
+    pstRunningTask = kGetRunningTask();
+    iOffset = ( pstRunningTask->stLink.qwID & 0xFFFFFFFF ) * 2;
+    iOffset = CONSOLE_WIDTH * CONSOLE_HEIGHT - 
+        ( iOffset % ( CONSOLE_WIDTH * CONSOLE_HEIGHT ) );
+
+    while( 1 )
+    {
+        // ȸ���ϴ� �ٶ����� ǥ��
+        pstScreen[ iOffset ].bCharactor = vcData[ i % 4 ];
+        // ���� ����
+        pstScreen[ iOffset ].bAttribute = ( iOffset % 15 ) + 1;
+        i++;
+        
+        // �ٸ� �½�ũ�� ��ȯ
+        kSchedule();
+    }
+}
+
+/**
+ *  �½�ũ�� �����ؼ� ��Ƽ �½�ŷ ����
  */
 void kCreateTestTask( const char* pcParameterBuffer )
 {
-    KEYDATA stData;
-    int i = 0;
+    PARAMETERLIST stList;
+    char vcType[ 30 ];
+    char vcCount[ 30 ];
+    int i;
     
-    // 태스크 설정
-    kSetUpTask( &( gs_vstTask[ 1 ] ), 1, 0, ( QWORD ) kTestTask, &( gs_vstStack ), 
-                sizeof( gs_vstStack ) );
-    
-    // 'q' 키가 입력되지 않을 때까지 수행
-    while( 1 )
+    // �Ķ���͸� ����
+    kInitializeParameter( &stList, pcParameterBuffer );
+    kGetNextParameter( &stList, vcType );
+    kGetNextParameter( &stList, vcCount );
+
+    switch( kAToI( vcType, 10 ) )
     {
-        // 메시지를 출력하고 키 입력을 대기
-        kPrintf( "[%d] This message is from kConsoleShell. Press any key to "
-                 "switch TestTask~!!\n", i++ );
-        if( kGetCh() == 'q' )
-        {
-            break;
+    // Ÿ�� 1 �½�ũ ����
+    case 1:
+        for( i = 0 ; i < kAToI( vcCount, 10 ) ; i++ )
+        {    
+            if( kCreateTask( 0, ( QWORD ) kTestTask1 ) == NULL )
+            {
+                break;
+            }
         }
-        // 위에서 키가 입력되면 태스크를 전환
-        kSwitchContext( &( gs_vstTask[ 0 ].stContext ), &( gs_vstTask[ 1 ].stContext ) );
-    }
-}
+        
+        kPrintf( "Task1 %d Created\n", i );
+        break;
+        
+    // Ÿ�� 2 �½�ũ ����
+    case 2:
+    default:
+        for( i = 0 ; i < kAToI( vcCount, 10 ) ; i++ )
+        {    
+            if( kCreateTask( 0, ( QWORD ) kTestTask2 ) == NULL )
+            {
+                break;
+            }
+        }
+        
+        kPrintf( "Task2 %d Created\n", i );
+        break;
+    }    
+}   
+ 
