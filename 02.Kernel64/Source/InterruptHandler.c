@@ -14,6 +14,8 @@
 #include "Utility.h"
 #include "Task.h"
 #include "Descriptor.h"
+#include "AssemblyUtility.h"
+#include "HardDisk.h"
 
 /**
  *  �������� ����ϴ� ���� �ڵ鷯
@@ -25,7 +27,7 @@ void kCommonExceptionHandler( int iVectorNumber, QWORD qwErrorCode )
     // ���ͷ�Ʈ ���͸� ȭ�� ������ ���� 2�ڸ� ������ ���
     vcBuffer[ 0 ] = '0' + iVectorNumber / 10;
     vcBuffer[ 1 ] = '0' + iVectorNumber % 10;
-    
+
     kPrintStringXY( 0, 0, "====================================================" );
     kPrintStringXY( 0, 1, "                 Exception Occur~!!!!               " );
     kPrintStringXY( 0, 2, "                    Vector:                         " );
@@ -53,7 +55,7 @@ void kCommonInterruptHandler( int iVectorNumber )
     g_iCommonInterruptCount = ( g_iCommonInterruptCount + 1 ) % 10;
     kPrintStringXY( 70, 0, vcBuffer );
     //=========================================================================
-    
+
     // EOI ����
     kSendEOIToPIC( iVectorNumber - PIC_IRQSTARTVECTOR );
 }
@@ -88,6 +90,7 @@ void kKeyboardHandler( int iVectorNumber )
     // EOI ����
     kSendEOIToPIC( iVectorNumber - PIC_IRQSTARTVECTOR );
 }
+
 void kPageFault(int iVectorNumber,QWORD qwErrorCode){
     QWORD pml4addr = kGetCr3();
     QWORD addr = kGetCr2();
@@ -109,7 +112,7 @@ void kPageFault(int iVectorNumber,QWORD qwErrorCode){
         kPrintf("        Protection Fault Occur~!!!!      \n");
         kPrintf("           Address: 0x%q\n", addr);
         kPrintf("=========================================\n");
-         
+
     }
     else if(!(qwErrorCode&1)){
         *tableEntry |= 1;
@@ -120,33 +123,64 @@ void kPageFault(int iVectorNumber,QWORD qwErrorCode){
     }
     invlpg(addr);
 }
+
+/**
+ *  타이머 인터럽트의 핸들러
+ */
 void kTimerHandler( int iVectorNumber )
 {
     char vcBuffer[] = "[INT:  , ]";
     static int g_iTimerInterruptCount = 0;
 
     //=========================================================================
-    // ���ͷ�Ʈ�� �߻������� �˸����� �޽����� ����ϴ� �κ�
-    // ���ͷ�Ʈ ���͸� ȭ�� ������ ���� 2�ڸ� ������ ���
+    // 인터럽트가 발생했음을 알리려고 메시지를 출력하는 부분
+    // 인터럽트 벡터를 화면 오른쪽 위에 2자리 정수로 출력
     vcBuffer[ 5 ] = '0' + iVectorNumber / 10;
     vcBuffer[ 6 ] = '0' + iVectorNumber % 10;
-    // �߻��� Ƚ�� ���
+    // 발생한 횟수 출력
     vcBuffer[ 8 ] = '0' + g_iTimerInterruptCount;
     g_iTimerInterruptCount = ( g_iTimerInterruptCount + 1 ) % 10;
     kPrintStringXY( 70, 0, vcBuffer );
     //=========================================================================
-    
-    // EOI ����
+
+    // EOI 전송
     kSendEOIToPIC( iVectorNumber - PIC_IRQSTARTVECTOR );
 
-    // Ÿ�̸� �߻� Ƚ���� ����
+    // 타이머 발생 횟수를 증가
     g_qwTickCount++;
 
-    // �½�ũ�� ����� ���μ����� �ð��� ����
+    // 태스크가 사용한 프로세서의 시간을 줄임
     kDecreaseProcessorTime();
-    // ���μ����� ����� �� �ִ� �ð��� �� ��ٸ� �½�ũ ��ȯ ����
+    // 프로세서가 사용할 수 있는 시간을 다 썼다면 태스크 전환 수행
     if( kIsProcessorTimeExpired() == TRUE )
     {
         kScheduleInInterrupt();
     }
+}
+
+/**
+ *  하드 디스크에서 발생하는 인터럽트의 핸들러
+ */
+void kHDDHandler( int iVectorNumber )
+{
+    char vcBuffer[] = "[INT:  , ]";
+    static int g_iHDDInterruptCount = 0;
+    BYTE bTemp;
+
+    //=========================================================================
+    // 인터럽트가 발생했음을 알리려고 메시지를 출력하는 부분
+    // 인터럽트 벡터를 화면 왼쪽 위에 2자리 정수로 출력
+    vcBuffer[ 5 ] = '0' + iVectorNumber / 10;
+    vcBuffer[ 6 ] = '0' + iVectorNumber % 10;
+    // 발생한 횟수 출력
+    vcBuffer[ 8 ] = '0' + g_iHDDInterruptCount;
+    g_iHDDInterruptCount = ( g_iHDDInterruptCount + 1 ) % 10;
+    // 왼쪽 위에 있는 메시지와 겹치지 않도록 (10, 0)에 출력
+    kPrintStringXY( 10, 0, vcBuffer );
+    //=========================================================================
+
+    // 첫 번째 PATA 포트의 인터럽트 발생 여부를 TRUE로 설정
+    kSetHDDInterruptFlag( TRUE, TRUE );
+    // EOI 전송
+    kSendEOIToPIC( iVectorNumber - PIC_IRQSTARTVECTOR );
 }

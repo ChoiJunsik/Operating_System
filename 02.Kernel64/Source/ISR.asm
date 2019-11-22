@@ -1,19 +1,19 @@
-# file      ISR.asm
+# file		ISR.asm
 # date      2009/01/24
-# author    kkamagui
+# author	kkamagui
 #           Copyright(c)2008 All rights reserved by kkamagui
-# brief     ���ͷ�Ʈ ���� ��ƾ(ISR) ���õ� �ҽ� ����
+# brief		인터럽트 서비스 루틴(ISR) 관련된 소스 파일
 
-[BITS 64]           ; ������ �ڵ�� 64��Ʈ �ڵ�� ����
+[BITS 64]           ; 이하의 코드는 64비트 코드로 설정
 
-SECTION .text       ; text ����(���׸�Ʈ)�� ����
+SECTION .text       ; text 섹션(세그먼트)을 정의
 
-; �ܺο��� ���ǵ� �Լ��� �� �� �ֵ��� ������(Import)
-extern kCommonExceptionHandler, kCommonInterruptHandler, kKeyboardHandler,kPageFault
-extern kTimerHandler
+; 외부에서 정의된 함수를 쓸 수 있도록 선언함(Import)
+extern kCommonExceptionHandler, kCommonInterruptHandler, kKeyboardHandler, kPageFault
+extern kTimerHandler, kHDDHandler
 
-; C ���� ȣ���� �� �ֵ��� �̸��� ������(Export)
-; ����(Exception) ó���� ���� ISR
+; C 언어에서 호출할 수 있도록 이름을 노출함(Export)
+; 예외(Exception) 처리를 위한 ISR
 global kISRDivideError, kISRDebug, kISRNMI, kISRBreakPoint, kISROverflow
 global kISRBoundRangeExceeded, kISRInvalidOpcode, kISRDeviceNotAvailable, kISRDoubleFault,
 global kISRCoprocessorSegmentOverrun, kISRInvalidTSS, kISRSegmentNotPresent
@@ -90,41 +90,41 @@ global kISRMouse, kISRCoprocessor, kISRHDD1, kISRHDD2, kISRETCInterrupt
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-;   ���� �ڵ鷯
+;	예외 핸들러
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; #0, Divide Error ISR
 kISRDivideError:
-    KSAVECONTEXT    ; ���ؽ�Ʈ�� ������ �� �����͸� Ŀ�� ������ ��ũ���ͷ� ��ü
+    KSAVECONTEXT    ; 콘텍스트를 저장한 뒤 셀렉터를 커널 데이터 디스크립터로 교체
 
-    ; �ڵ鷯�� ���� ��ȣ�� �����ϰ� �ڵ鷯 ȣ��
+    ; 핸들러에 예외 번호를 삽입하고 핸들러 호출
     mov rdi, 0
     call kCommonExceptionHandler
 
-    KLOADCONTEXT    ; ���ؽ�Ʈ�� ����
-    iretq           ; ���ͷ�Ʈ ó���� �Ϸ��ϰ� ������ �����ϴ� �ڵ�� ����
+    KLOADCONTEXT    ; 콘텍스트를 복원
+    iretq           ; 인터럽트 처리를 완료하고 이전에 수행하던 코드로 복원
 
 ; #1, Debug ISR
 kISRDebug:
-    KSAVECONTEXT    ; ���ؽ�Ʈ�� ������ �� �����͸� Ŀ�� ������ ��ũ���ͷ� ��ü
+    KSAVECONTEXT    ; 콘텍스트를 저장한 뒤 셀렉터를 커널 데이터 디스크립터로 교체
 
-    ; �ڵ鷯�� ���� ��ȣ�� �����ϰ� �ڵ鷯 ȣ��
+    ; 핸들러에 예외 번호를 삽입하고 핸들러 호출
     mov rdi, 1
     call kCommonExceptionHandler
 
-    KLOADCONTEXT    ; ���ؽ�Ʈ�� ����
-    iretq           ; ���ͷ�Ʈ ó���� �Ϸ��ϰ� ������ �����ϴ� �ڵ�� ����
+    KLOADCONTEXT    ; 콘텍스트를 복원
+    iretq           ; 인터럽트 처리를 완료하고 이전에 수행하던 코드로 복원
 
 ; #2, NMI ISR
 kISRNMI:
-    KSAVECONTEXT    ; ���ؽ�Ʈ�� ������ �� �����͸� Ŀ�� ������ ��ũ���ͷ� ��ü
+    KSAVECONTEXT    ; 콘텍스트를 저장한 뒤 셀렉터를 커널 데이터 디스크립터로 교체
 
-    ; �ڵ鷯�� ���� ��ȣ�� �����ϰ� �ڵ鷯 ȣ��
+    ; 핸들러에 예외 번호를 삽입하고 핸들러 호출
     mov rdi, 2
     call kCommonExceptionHandler
 
-    KLOADCONTEXT    ; ���ؽ�Ʈ�� ����
-    iretq           ; ���ͷ�Ʈ ó���� �Ϸ��ϰ� ������ �����ϴ� �ڵ�� ����
+    KLOADCONTEXT    ; 콘텍스트를 복원
+    iretq           ; 인터럽트 처리를 완료하고 이전에 수행하던 코드로 복원
 
 ; #3, BreakPoint ISR
 kISRBreakPoint:
@@ -341,19 +341,19 @@ kISRETCException:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;
-;   ���ͷ�Ʈ �ڵ鷯
+;	인터럽트 핸들러
 ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; #32, Ÿ�̸� ISR
+; #32, 타이머 ISR
 kISRTimer:
-    KSAVECONTEXT    ; ���ؽ�Ʈ�� ������ �� �����͸� Ŀ�� ������ ��ũ���ͷ� ��ü
+    KSAVECONTEXT    ; 콘텍스트를 저장한 뒤 셀렉터를 커널 데이터 디스크립터로 교체
 
-    ; �ڵ鷯�� ���ͷ�Ʈ ��ȣ�� �����ϰ� �ڵ鷯 ȣ��
+    ; 핸들러에 인터럽트 번호를 삽입하고 핸들러 호출
     mov rdi, 32
     call kTimerHandler
 
-    KLOADCONTEXT    ; ���ؽ�Ʈ�� ����
-    iretq           ; ���ͷ�Ʈ ó���� �Ϸ��ϰ� ������ �����ϴ� �ڵ�� ����
+    KLOADCONTEXT    ; 콘텍스트를 복원
+    iretq           ; 인터럽트 처리를 완료하고 이전에 수행하던 코드로 복원
 
 ; #33, Ű���� ISR
 kISRKeyboard:
@@ -498,16 +498,17 @@ kISRCoprocessor:
     KLOADCONTEXT    ; ���ؽ�Ʈ�� ����
     iretq           ; ���ͷ�Ʈ ó���� �Ϸ��ϰ� ������ �����ϴ� �ڵ�� ����
 
-; #46, �ϵ� ��ũ 1 ISR
+; #46, 하드 디스크 1 ISR
 kISRHDD1:
-    KSAVECONTEXT    ; ���ؽ�Ʈ�� ������ �� �����͸� Ŀ�� ������ ��ũ���ͷ� ��ü
-
-    ; �ڵ鷯�� ���ͷ�Ʈ ��ȣ�� �����ϰ� �ڵ鷯 ȣ��
+    KSAVECONTEXT    ; 콘텍스트를 저장한 뒤 셀렉터를 커널 데이터 디스크립터로 교체
+    
+    ; 핸들러에 인터럽트 번호를 삽입하고 핸들러 호출
     mov rdi, 46
-    call kCommonInterruptHandler
+    call kHDDHandler
 
-    KLOADCONTEXT    ; ���ؽ�Ʈ�� ����
-    iretq           ; ���ͷ�Ʈ ó���� �Ϸ��ϰ� ������ �����ϴ� �ڵ�� ����
+    KLOADCONTEXT    ; 콘텍스트를 복원
+    iretq           ; 인터럽트 처리를 완료하고 이전에 수행하던 코드로 복원
+
 
 ; #47, �ϵ� ��ũ 2 ISR
 kISRHDD2:

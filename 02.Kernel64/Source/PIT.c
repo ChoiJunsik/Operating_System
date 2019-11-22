@@ -26,7 +26,7 @@ void kInitializePIT( WORD wCount, BOOL bPeriodic )
     
     // 카운터 0(포트 0x40)에 LSB -> MSB 순으로 카운터 초기 값을 설정
     kOutPortByte( PIT_PORT_COUNTER0, wCount );
-    kOutPortByte( PIT_PORT_COUNTER0, wCount >> 8 );
+    kOutPortByte( PIT_PORT_COUNTER0, wCount >> 8 );    
 }
 
 /**

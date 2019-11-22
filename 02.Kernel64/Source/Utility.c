@@ -1,23 +1,26 @@
 /**
  *  file    Utility.h
  *  date    2009/01/17
- *  author  kkamagui 
+ *  author  kkamagui
  *          Copyright(c)2008 All rights reserved by kkamagui
- *  brief   OS���� ����� ��ƿ��Ƽ �Լ��� ���õ� ����
+ *  brief   OS占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙틸占쏙옙티 占쌉쇽옙占쏙옙 占쏙옙占시듸옙 占쏙옙占쏙옙
  */
 
 #include "Utility.h"
 #include "AssemblyUtility.h"
 #include <stdarg.h>
+
+
+// PIT 而⑦몃·�ш� 諛�� ��瑜� ���ν� 移댁댄�
 volatile QWORD g_qwTickCount = 0;
 
 /**
- *  �޸𸮸� Ư�� ������ ä��
- */
+*  硫紐⑤━瑜� �뱀� 媛�쇰� 梨�
+*/
 void kMemSet( void* pvDestination, BYTE bData, int iSize )
 {
     int i;
-    
+
     for( i = 0 ; i < iSize ; i++ )
     {
         ( ( char* ) pvDestination )[ i ] = bData;
@@ -25,28 +28,28 @@ void kMemSet( void* pvDestination, BYTE bData, int iSize )
 }
 
 /**
- *  �޸� ����
+ *  占쌨몌옙占쏙옙 占쏙옙占쏙옙
  */
 int kMemCpy( void* pvDestination, const void* pvSource, int iSize )
 {
     int i;
-    
+
     for( i = 0 ; i < iSize ; i++ )
     {
         ( ( char* ) pvDestination )[ i ] = ( ( char* ) pvSource )[ i ];
     }
-    
+
     return iSize;
 }
 
 /**
- *  �޸� ��
+ *  占쌨몌옙占쏙옙 占쏙옙占쏙옙
  */
 int kMemCmp( const void* pvDestination, const void* pvSource, int iSize )
 {
     int i;
     char cTemp;
-    
+
     for( i = 0 ; i < iSize ; i++ )
     {
         cTemp = ( ( char* ) pvDestination )[ i ] - ( ( char* ) pvSource )[ i ];
@@ -59,13 +62,13 @@ int kMemCmp( const void* pvDestination, const void* pvSource, int iSize )
 }
 
 /**
- *  RFLAGS ���������� ���ͷ�Ʈ �÷��׸� �����ϰ� ���� ���ͷ�Ʈ �÷����� ���¸� ��ȯ
+ *  RFLAGS 占쏙옙占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占싶뤄옙트 占시뤄옙占쌓몌옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쏙옙 占쏙옙占싶뤄옙트 占시뤄옙占쏙옙占쏙옙 占쏙옙占승몌옙 占쏙옙환
  */
 BOOL kSetInterruptFlag( BOOL bEnableInterrupt )
 {
     QWORD qwRFLAGS;
 
-    // ������ RFLAGS �������� ���� ���� �ڿ� ���ͷ�Ʈ ����/�Ұ� ó��
+    // 占쏙옙占쏙옙占쏙옙 RFLAGS 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙 占쌘울옙 占쏙옙占싶뤄옙트 占쏙옙占쏙옙/占쌀곤옙 처占쏙옙
     qwRFLAGS = kReadRFLAGS();
     if( bEnableInterrupt == TRUE )
     {
@@ -76,7 +79,7 @@ BOOL kSetInterruptFlag( BOOL bEnableInterrupt )
         kDisableInterrupt();
     }
 
-    // ���� RFLAGS ���������� IF ��Ʈ(��Ʈ 9)�� Ȯ���Ͽ� ������ ���ͷ�Ʈ ���¸� ��ȯ
+    // 占쏙옙占쏙옙 RFLAGS 占쏙옙占쏙옙占쏙옙占쏙옙占쏙옙 IF 占쏙옙트(占쏙옙트 9)占쏙옙 확占쏙옙占싹울옙 占쏙옙占쏙옙占쏙옙 占쏙옙占싶뤄옙트 占쏙옙占승몌옙 占쏙옙환
     if( qwRFLAGS & 0x0200 )
     {
         return TRUE;
@@ -85,12 +88,12 @@ BOOL kSetInterruptFlag( BOOL bEnableInterrupt )
 }
 
 /**
- *  ���ڿ��� ���̸� ��ȯ
+ *  占쏙옙占쌘울옙占쏙옙 占쏙옙占싱몌옙 占쏙옙환
  */
 int kStrLen( const char* pcBuffer )
 {
     int i;
-    
+
     for( i = 0 ; ; i++ )
     {
         if( pcBuffer[ i ] == '\0' )
@@ -101,42 +104,42 @@ int kStrLen( const char* pcBuffer )
     return i;
 }
 
-// ���� �� ũ��(Mbyte ����)
+// 占쏙옙占쏙옙 占쏙옙 크占쏙옙(Mbyte 占쏙옙占쏙옙)
 static gs_qwTotalRAMMBSize = 0;
 
 /**
- *  64Mbyte �̻��� ��ġ���� �� ũ�⸦ üũ
- *      ���� ���� �������� �ѹ��� ȣ���ؾ� ��
+ *  64Mbyte 占싱삼옙占쏙옙 占쏙옙치占쏙옙占쏙옙 占쏙옙 크占썩를 체크
+ *      占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占싼뱄옙占쏙옙 호占쏙옙占쌔억옙 占쏙옙
  */
 void kCheckTotalRAMSize( void )
 {
     DWORD* pdwCurrentAddress;
     DWORD dwPreviousValue;
-    
-    // 64Mbyte(0x4000000)���� 4Mbyte������ �˻� ����
+
+    // 64Mbyte(0x4000000)占쏙옙占쏙옙 4Mbyte占쏙옙占쏙옙占쏙옙 占싯삼옙 占쏙옙占쏙옙
     pdwCurrentAddress = ( DWORD* ) 0x4000000;
     while( 1 )
     {
-        // ������ �޸𸮿� �ִ� ���� ����
+        // 占쏙옙占쏙옙占쏙옙 占쌨모리울옙 占쌍댐옙 占쏙옙占쏙옙 占쏙옙占쏙옙
         dwPreviousValue = *pdwCurrentAddress;
-        // 0x12345678�� �Ἥ �о��� �� ������ ���� �������� ��ȿ�� �޸� 
-        // �������� ����
+        // 0x12345678占쏙옙 占써서 占싻억옙占쏙옙 占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙효占쏙옙 占쌨몌옙占쏙옙
+        // 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙
         *pdwCurrentAddress = 0x12345678;
         if( *pdwCurrentAddress != 0x12345678 )
         {
             break;
         }
-        // ���� �޸� ������ ����
+        // 占쏙옙占쏙옙 占쌨몌옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙
         *pdwCurrentAddress = dwPreviousValue;
-        // ���� 4Mbyte ��ġ�� �̵�
+        // 占쏙옙占쏙옙 4Mbyte 占쏙옙치占쏙옙 占싱듸옙
         pdwCurrentAddress += ( 0x400000 / 4 );
     }
-    // üũ�� ������ ��巹���� 1Mbyte�� ������ Mbyte ������ ���
+    // 체크占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占썲레占쏙옙占쏙옙 1Mbyte占쏙옙 占쏙옙占쏙옙占쏙옙 Mbyte 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙
     gs_qwTotalRAMMBSize = ( QWORD ) pdwCurrentAddress / 0x100000;
 }
 
 /**
- *  RAM ũ�⸦ ��ȯ
+ *  RAM 크占썩를 占쏙옙환
  */
 QWORD kGetTotalRAMSize( void )
 {
@@ -144,20 +147,20 @@ QWORD kGetTotalRAMSize( void )
 }
 
 /**
- *  atoi() �Լ��� ���� ����
+ *  atoi() 占쌉쇽옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
  */
 long kAToI( const char* pcBuffer, int iRadix )
 {
     long lReturn;
-    
+
     switch( iRadix )
     {
-        // 16����
+        // 16占쏙옙占쏙옙
     case 16:
         lReturn = kHexStringToQword( pcBuffer );
         break;
-        
-        // 10���� �Ǵ� ��Ÿ
+
+        // 10占쏙옙占쏙옙 占실댐옙 占쏙옙타
     case 10:
     default:
         lReturn = kDecimalStringToLong( pcBuffer );
@@ -167,14 +170,14 @@ long kAToI( const char* pcBuffer, int iRadix )
 }
 
 /**
- *  16���� ���ڿ��� QWORD�� ��ȯ 
+ *  16占쏙옙占쏙옙 占쏙옙占쌘울옙占쏙옙 QWORD占쏙옙 占쏙옙환
  */
 QWORD kHexStringToQword( const char* pcBuffer )
 {
     QWORD qwValue = 0;
     int i;
-    
-    // ���ڿ��� ���鼭 ���ʷ� ��ȯ
+
+    // 占쏙옙占쌘울옙占쏙옙 占쏙옙占썽서 占쏙옙占십뤄옙 占쏙옙환
     for( i = 0 ; pcBuffer[ i ] != '\0' ; i++ )
     {
         qwValue *= 16;
@@ -186,7 +189,7 @@ QWORD kHexStringToQword( const char* pcBuffer )
         {
             qwValue += ( pcBuffer[ i ] - 'a' ) + 10;
         }
-        else 
+        else
         {
             qwValue += pcBuffer[ i ] - '0';
         }
@@ -195,14 +198,14 @@ QWORD kHexStringToQword( const char* pcBuffer )
 }
 
 /**
- *  10���� ���ڿ��� long���� ��ȯ
+ *  10占쏙옙占쏙옙 占쏙옙占쌘울옙占쏙옙 long占쏙옙占쏙옙 占쏙옙환
  */
 long kDecimalStringToLong( const char* pcBuffer )
 {
     long lValue = 0;
     int i;
-    
-    // �����̸� -�� �����ϰ� �������� ���� long���� ��ȯ
+
+    // 占쏙옙占쏙옙占싱몌옙 -占쏙옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 long占쏙옙占쏙옙 占쏙옙환
     if( pcBuffer[ 0 ] == '-' )
     {
         i = 1;
@@ -211,15 +214,15 @@ long kDecimalStringToLong( const char* pcBuffer )
     {
         i = 0;
     }
-    
-    // ���ڿ��� ���鼭 ���ʷ� ��ȯ
+
+    // 占쏙옙占쌘울옙占쏙옙 占쏙옙占썽서 占쏙옙占십뤄옙 占쏙옙환
     for( ; pcBuffer[ i ] != '\0' ; i++ )
     {
         lValue *= 10;
         lValue += pcBuffer[ i ] - '0';
     }
-    
-    // �����̸� - �߰�
+
+    // 占쏙옙占쏙옙占싱몌옙 - 占쌩곤옙
     if( pcBuffer[ 0 ] == '-' )
     {
         lValue = -lValue;
@@ -228,46 +231,46 @@ long kDecimalStringToLong( const char* pcBuffer )
 }
 
 /**
- *  itoa() �Լ��� ���� ����
+ *  itoa() 占쌉쇽옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
  */
 int kIToA( long lValue, char* pcBuffer, int iRadix )
 {
     int iReturn;
-    
+
     switch( iRadix )
     {
-        // 16����
+        // 16占쏙옙占쏙옙
     case 16:
         iReturn = kHexToString( lValue, pcBuffer );
         break;
-        
-        // 10���� �Ǵ� ��Ÿ
+
+        // 10占쏙옙占쏙옙 占실댐옙 占쏙옙타
     case 10:
     default:
         iReturn = kDecimalToString( lValue, pcBuffer );
         break;
     }
-    
+
     return iReturn;
 }
 
 /**
- *  16���� ���� ���ڿ��� ��ȯ
+ *  16占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쌘울옙占쏙옙 占쏙옙환
  */
 int kHexToString( QWORD qwValue, char* pcBuffer )
 {
     QWORD i;
     QWORD qwCurrentValue;
 
-    // 0�� ������ �ٷ� ó��
+    // 0占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占쌕뤄옙 처占쏙옙
     if( qwValue == 0 )
     {
         pcBuffer[ 0 ] = '0';
         pcBuffer[ 1 ] = '\0';
         return 1;
     }
-    
-    // ���ۿ� 1�� �ڸ����� 16, 256, ...�� �ڸ� ������ ���� ����
+
+    // 占쏙옙占쌜울옙 1占쏙옙 占쌘몌옙占쏙옙占쏙옙 16, 256, ...占쏙옙 占쌘몌옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
     for( i = 0 ; qwValue > 0 ; i++ )
     {
         qwCurrentValue = qwValue % 16;
@@ -279,32 +282,32 @@ int kHexToString( QWORD qwValue, char* pcBuffer )
         {
             pcBuffer[ i ] = '0' + qwCurrentValue;
         }
-        
+
         qwValue = qwValue / 16;
     }
     pcBuffer[ i ] = '\0';
-    
-    // ���ۿ� ����ִ� ���ڿ��� ����� ... 256, 16, 1�� �ڸ� ������ ����
+
+    // 占쏙옙占쌜울옙 占쏙옙占쏙옙占쌍댐옙 占쏙옙占쌘울옙占쏙옙 占쏙옙占쏙옙占쏘서 ... 256, 16, 1占쏙옙 占쌘몌옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙
     kReverseString( pcBuffer );
     return i;
 }
 
 /**
- *  10���� ���� ���ڿ��� ��ȯ
+ *  10占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쌘울옙占쏙옙 占쏙옙환
  */
 int kDecimalToString( long lValue, char* pcBuffer )
 {
     long i;
 
-    // 0�� ������ �ٷ� ó��
+    // 0占쏙옙 占쏙옙占쏙옙占쏙옙占쏙옙 占쌕뤄옙 처占쏙옙
     if( lValue == 0 )
     {
         pcBuffer[ 0 ] = '0';
         pcBuffer[ 1 ] = '\0';
         return 1;
     }
-    
-    // ���� �����̸� ��� ���ۿ� '-'�� �߰��ϰ� ����� ��ȯ
+
+    // 占쏙옙占쏙옙 占쏙옙占쏙옙占싱몌옙 占쏙옙占쏙옙 占쏙옙占쌜울옙 '-'占쏙옙 占쌩곤옙占싹곤옙 占쏙옙占쏙옙占쏙옙 占쏙옙환
     if( lValue < 0 )
     {
         i = 1;
@@ -316,39 +319,39 @@ int kDecimalToString( long lValue, char* pcBuffer )
         i = 0;
     }
 
-    // ���ۿ� 1�� �ڸ����� 10, 100, 1000 ...�� �ڸ� ������ ���� ����
+    // 占쏙옙占쌜울옙 1占쏙옙 占쌘몌옙占쏙옙占쏙옙 10, 100, 1000 ...占쏙옙 占쌘몌옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
     for( ; lValue > 0 ; i++ )
     {
-        pcBuffer[ i ] = '0' + lValue % 10;        
+        pcBuffer[ i ] = '0' + lValue % 10;
         lValue = lValue / 10;
     }
     pcBuffer[ i ] = '\0';
-    
-    // ���ۿ� ����ִ� ���ڿ��� ����� ... 1000, 100, 10, 1�� �ڸ� ������ ����
+
+    // 占쏙옙占쌜울옙 占쏙옙占쏙옙占쌍댐옙 占쏙옙占쌘울옙占쏙옙 占쏙옙占쏙옙占쏘서 ... 1000, 100, 10, 1占쏙옙 占쌘몌옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙
     if( pcBuffer[ 0 ] == '-' )
     {
-        // ������ ���� ��ȣ�� �����ϰ� ���ڿ��� ������
+        // 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙호占쏙옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쌘울옙占쏙옙 占쏙옙占쏙옙占쏙옙
         kReverseString( &( pcBuffer[ 1 ] ) );
     }
     else
     {
         kReverseString( pcBuffer );
     }
-    
+
     return i;
 }
 
 /**
- *  ���ڿ��� ������ ������
+ *  占쏙옙占쌘울옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙
  */
 void kReverseString( char* pcBuffer )
 {
    int iLength;
    int i;
    char cTemp;
-   
-   
-   // ���ڿ��� ����� �߽����� ��/�츦 �ٲ㼭 ������ ������
+
+
+   // 占쏙옙占쌘울옙占쏙옙 占쏙옙占쏘데占쏙옙 占쌩쏙옙占쏙옙占쏙옙 占쏙옙/占쎌를 占쌕꿔서 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙
    iLength = kStrLen( pcBuffer );
    for( i = 0 ; i < iLength / 2 ; i++ )
    {
@@ -359,24 +362,24 @@ void kReverseString( char* pcBuffer )
 }
 
 /**
- *  sprintf() �Լ��� ���� ����
+ *  sprintf() 占쌉쇽옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
  */
 int kSPrintf( char* pcBuffer, const char* pcFormatString, ... )
 {
     va_list ap;
     int iReturn;
-    
-    // ���� ���ڸ� ������ vsprintf() �Լ��� �Ѱ���
+
+    // 占쏙옙占쏙옙 占쏙옙占쌘몌옙 占쏙옙占쏙옙占쏙옙 vsprintf() 占쌉쇽옙占쏙옙 占싼곤옙占쏙옙
     va_start( ap, pcFormatString );
     iReturn = kVSPrintf( pcBuffer, pcFormatString, ap );
     va_end( ap );
-    
+
     return iReturn;
 }
 
 /**
- *  vsprintf() �Լ��� ���� ����
- *      ���ۿ� ���� ���ڿ��� ���� �����͸� ����
+ *  vsprintf() 占쌉쇽옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙
+ *      占쏙옙占쌜울옙 占쏙옙占쏙옙 占쏙옙占쌘울옙占쏙옙 占쏙옙占쏙옙 占쏙옙占쏙옙占싶몌옙 占쏙옙占쏙옙
  */
 int kVSPrintf( char* pcBuffer, const char* pcFormatString, va_list ap )
 {
@@ -386,86 +389,106 @@ int kVSPrintf( char* pcBuffer, const char* pcFormatString, va_list ap )
     char* pcCopyString;
     QWORD qwValue;
     int iValue;
-    
-    // ���� ���ڿ��� ���̸� �о ���ڿ��� ���̸�ŭ �����͸� ��� ���ۿ� ���
+
+    // 占쏙옙占쏙옙 占쏙옙占쌘울옙占쏙옙 占쏙옙占싱몌옙 占싻어서 占쏙옙占쌘울옙占쏙옙 占쏙옙占싱몌옙큼 占쏙옙占쏙옙占싶몌옙 占쏙옙占쏙옙 占쏙옙占쌜울옙 占쏙옙占쏙옙
     iFormatLength = kStrLen( pcFormatString );
-    for( i = 0 ; i < iFormatLength ; i++ ) 
+    for( i = 0 ; i < iFormatLength ; i++ )
     {
-        // %�� �����ϸ� ������ Ÿ�� ���ڷ� ó��
-        if( pcFormatString[ i ] == '%' ) 
+        // %占쏙옙 占쏙옙占쏙옙占싹몌옙 占쏙옙占쏙옙占쏙옙 타占쏙옙 占쏙옙占쌘뤄옙 처占쏙옙
+        if( pcFormatString[ i ] == '%' )
         {
-            // % ������ ���ڷ� �̵�
+            // % 占쏙옙占쏙옙占쏙옙 占쏙옙占쌘뤄옙 占싱듸옙
             i++;
-            switch( pcFormatString[ i ] ) 
+            switch( pcFormatString[ i ] )
             {
-                // ���ڿ� ���  
+                // 占쏙옙占쌘울옙 占쏙옙占쏙옙
             case 's':
-                // ���� ���ڿ� ����ִ� �Ķ���͸� ���ڿ� Ÿ������ ��ȯ
+                // 占쏙옙占쏙옙 占쏙옙占쌘울옙 占쏙옙占쏙옙占쌍댐옙 占식띰옙占쏙옙占싶몌옙 占쏙옙占쌘울옙 타占쏙옙占쏙옙占쏙옙 占쏙옙환
                 pcCopyString = ( char* ) ( va_arg(ap, char* ));
                 iCopyLength = kStrLen( pcCopyString );
-                // ���ڿ��� ���̸�ŭ�� ��� ���۷� �����ϰ� ����� ���̸�ŭ 
-                // ������ �ε����� �̵�
+                // 占쏙옙占쌘울옙占쏙옙 占쏙옙占싱몌옙큼占쏙옙 占쏙옙占쏙옙 占쏙옙占쌜뤄옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쏙옙占쏙옙 占쏙옙占싱몌옙큼
+                // 占쏙옙占쏙옙占쏙옙 占싸듸옙占쏙옙占쏙옙 占싱듸옙
                 kMemCpy( pcBuffer + iBufferIndex, pcCopyString, iCopyLength );
                 iBufferIndex += iCopyLength;
                 break;
-                
-                // ���� ���
+
+                // 占쏙옙占쏙옙 占쏙옙占쏙옙
             case 'c':
-                // ���� ���ڿ� ����ִ� �Ķ���͸� ���� Ÿ������ ��ȯ�Ͽ� 
-                // ��� ���ۿ� �����ϰ� ������ �ε����� 1��ŭ �̵�
+                // 占쏙옙占쏙옙 占쏙옙占쌘울옙 占쏙옙占쏙옙占쌍댐옙 占식띰옙占쏙옙占싶몌옙 占쏙옙占쏙옙 타占쏙옙占쏙옙占쏙옙 占쏙옙환占싹울옙
+                // 占쏙옙占쏙옙 占쏙옙占쌜울옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쏙옙占쏙옙 占싸듸옙占쏙옙占쏙옙 1占쏙옙큼 占싱듸옙
                 pcBuffer[ iBufferIndex ] = ( char ) ( va_arg( ap, int ) );
                 iBufferIndex++;
                 break;
 
-                // ���� ���
+                // 占쏙옙占쏙옙 占쏙옙占쏙옙
             case 'd':
             case 'i':
-                // ���� ���ڿ� ����ִ� �Ķ���͸� ���� Ÿ������ ��ȯ�Ͽ�
-                // ��� ���ۿ� �����ϰ� ����� ���̸�ŭ ������ �ε����� �̵�
+                // 占쏙옙占쏙옙 占쏙옙占쌘울옙 占쏙옙占쏙옙占쌍댐옙 占식띰옙占쏙옙占싶몌옙 占쏙옙占쏙옙 타占쏙옙占쏙옙占쏙옙 占쏙옙환占싹울옙
+                // 占쏙옙占쏙옙 占쏙옙占쌜울옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쏙옙占쏙옙 占쏙옙占싱몌옙큼 占쏙옙占쏙옙占쏙옙 占싸듸옙占쏙옙占쏙옙 占싱듸옙
                 iValue = ( int ) ( va_arg( ap, int ) );
                 iBufferIndex += kIToA( iValue, pcBuffer + iBufferIndex, 10 );
                 break;
-                
-                // 4����Ʈ Hex ���
+
+                // 4占쏙옙占쏙옙트 Hex 占쏙옙占쏙옙
             case 'x':
             case 'X':
-                // ���� ���ڿ� ����ִ� �Ķ���͸� DWORD Ÿ������ ��ȯ�Ͽ�
-                // ��� ���ۿ� �����ϰ� ����� ���̸�ŭ ������ �ε����� �̵�
+                // 占쏙옙占쏙옙 占쏙옙占쌘울옙 占쏙옙占쏙옙占쌍댐옙 占식띰옙占쏙옙占싶몌옙 DWORD 타占쏙옙占쏙옙占쏙옙 占쏙옙환占싹울옙
+                // 占쏙옙占쏙옙 占쏙옙占쌜울옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쏙옙占쏙옙 占쏙옙占싱몌옙큼 占쏙옙占쏙옙占쏙옙 占싸듸옙占쏙옙占쏙옙 占싱듸옙
                 qwValue = ( DWORD ) ( va_arg( ap, DWORD ) ) & 0xFFFFFFFF;
                 iBufferIndex += kIToA( qwValue, pcBuffer + iBufferIndex, 16 );
                 break;
 
-                // 8����Ʈ Hex ���
+                // 8占쏙옙占쏙옙트 Hex 占쏙옙占쏙옙
             case 'q':
             case 'Q':
             case 'p':
-                // ���� ���ڿ� ����ִ� �Ķ���͸� QWORD Ÿ������ ��ȯ�Ͽ�
-                // ��� ���ۿ� �����ϰ� ����� ���̸�ŭ ������ �ε����� �̵�
+                // 占쏙옙占쏙옙 占쏙옙占쌘울옙 占쏙옙占쏙옙占쌍댐옙 占식띰옙占쏙옙占싶몌옙 QWORD 타占쏙옙占쏙옙占쏙옙 占쏙옙환占싹울옙
+                // 占쏙옙占쏙옙 占쏙옙占쌜울옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쏙옙占쏙옙 占쏙옙占싱몌옙큼 占쏙옙占쏙옙占쏙옙 占싸듸옙占쏙옙占쏙옙 占싱듸옙
                 qwValue = ( QWORD ) ( va_arg( ap, QWORD ) );
                 iBufferIndex += kIToA( qwValue, pcBuffer + iBufferIndex, 16 );
                 break;
-            
-                // ���� �ش����� ������ ���ڸ� �״�� ����ϰ� ������ �ε�����
-                // 1��ŭ �̵�
+
+                // 占쏙옙占쏙옙 占쌔댐옙占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쌘몌옙 占쌓댐옙占쏙옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쏙옙占쏙옙 占싸듸옙占쏙옙占쏙옙
+                // 1占쏙옙큼 占싱듸옙
             default:
                 pcBuffer[ iBufferIndex ] = pcFormatString[ i ];
                 iBufferIndex++;
                 break;
             }
-        } 
-        // �Ϲ� ���ڿ� ó��
+        }
+        // 占싹뱄옙 占쏙옙占쌘울옙 처占쏙옙
         else
         {
-            // ���ڸ� �״�� ����ϰ� ������ �ε����� 1��ŭ �̵�
+            // 占쏙옙占쌘몌옙 占쌓댐옙占쏙옙 占쏙옙占쏙옙占싹곤옙 占쏙옙占쏙옙占쏙옙 占싸듸옙占쏙옙占쏙옙 1占쏙옙큼 占싱듸옙
             pcBuffer[ iBufferIndex ] = pcFormatString[ i ];
             iBufferIndex++;
         }
     }
-    
-    // NULL�� �߰��Ͽ� ������ ���ڿ��� ����� ����� ������ ���̸� ��ȯ
+
+    // NULL占쏙옙 占쌩곤옙占싹울옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쌘울옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占쏙옙占쏙옙 占쏙옙占싱몌옙 占쏙옙환
     pcBuffer[ iBufferIndex ] = '\0';
     return iBufferIndex;
 }
-QWORD kGetTickCount(void){
+
+/**
+ *  Tick Count를 반환
+ */
+QWORD kGetTickCount( void )
+{
     return g_qwTickCount;
+}
+
+/**
+ *  밀리세컨드(milisecond) 동안 대기
+ */
+void kSleep( QWORD qwMillisecond )
+{
+    QWORD qwLastTickCount;
+
+    qwLastTickCount = g_qwTickCount;
+
+    while( ( g_qwTickCount - qwLastTickCount ) <= qwMillisecond )
+    {
+        kSchedule();
+    }
 }

@@ -1,7 +1,7 @@
 /**
  *  file    Types.h
  *  date    2008/12/14
- *  author  kkamagui 
+ *  author  kkamagui
  *          Copyright(c)2008 All rights reserved by kkamagui
  *  brief   커널에서 사용하는 각종 타입을 정의한 파일
  */
@@ -24,6 +24,9 @@
 #define TRUE    1
 #define FALSE   0
 #define NULL    0
+
+// stddef.h 헤더에 포함된 offsetof() 매크로의 내용
+#define offsetof(TYPE, MEMBER) __builtin_offsetof (TYPE, MEMBER)
 
 ////////////////////////////////////////////////////////////////////////////////
 //
