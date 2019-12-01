@@ -831,7 +831,7 @@ static int kFindFreeDirectoryEntry( void )
     }
 
     // 루트 디렉터리를 읽음
-    if( kReadCluster( 0, gs_vbTempBuffer ) == FALSE )
+    if( kReadCluster( curClusterIdx, gs_vbTempBuffer ) == FALSE )
     {
         return -1;
     }
@@ -923,7 +923,7 @@ static int kFindDirectoryEntry( const char* pcFileName, DIRECTORYENTRY* pstEntry
     }
 
     // 루트 디렉터리를 읽음
-    if( kReadCluster( 0, gs_vbTempBuffer ) == FALSE )
+    if( kReadCluster( curClusterIdx, gs_vbTempBuffer ) == FALSE )
     {
         return -1;
     }
