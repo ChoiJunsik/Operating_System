@@ -1664,7 +1664,23 @@ int kCloseFile( FILE* pstFile )
     kFreeFileDirectoryHandle( pstFile );
     return 0;
 }
-
+BOOL kUpdateDir(int directoryEntryIdx,const char* fileName,const char* parentPath, int parentIdx )
+{
+    DWORD dwCluster;
+    DIRECTORYENTRY stEntry;
+    int iDirectoryEntryOffset = directoryEntryIdx;
+    kMemCpy( stEntry.vcFileName, fileName, kStrLen(fileName)+1 );
+    kMemCpy(stEntry.parentPath,parentPath,kStrLen(parentPath)+1);
+    stEntry.dwStartClusterIndex = -1;
+    stEntry.dwFileSize = 0;
+    stEntry.type=1;
+    stEntry.parentCluserIdx = parentIdx;
+    if( kSetDirectoryEntryData( iDirectoryEntryOffset, &stEntry ) == FALSE )
+    {       
+        return FALSE;
+    }
+    return TRUE;
+}
 /**
  *  핸들 풀을 검사하여 파일이 열려있는지를 확인
  */

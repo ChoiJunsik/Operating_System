@@ -2522,12 +2522,12 @@ static void kCd( const char* pcParamegerBuffer){
                 if( info[0].dwStartClusterIndex != -1 )
                 {
                     kMakeDot();
-                    kUpdateDirectory(0,".",pwd,curDirectoryClusterIdx);
+                    kUpdateDir(0,".",pwd,curDirectoryClusterIdx);
                 
                 }
                 info[1].parentCluserIdx = tempIdx;
                 kMemCpy(info[1].parentCluserIdx,tempPath,kStrLen(tempPath)+1);
-                kUpdateDirectory( 1,"..",tempPath, tempIdx );
+                kUpdateDir( 1,"..",tempPath, tempIdx );
             
                 break;
             
