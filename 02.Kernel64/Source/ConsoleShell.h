@@ -17,7 +17,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #define CONSOLESHELL_MAXCOMMANDBUFFERCOUNT  300
-#define CONSOLESHELL_PROMPTMESSAGE          "MINT64>"
+#define CONSOLESHELL_PROMPTMESSAGE          "MINT64:"
 
 // 占쏙옙占쌘울옙 占쏙옙占쏙옙占싶몌옙 占식띰옙占쏙옙庫占� 占쌨댐옙 占쌉쇽옙 占쏙옙占쏙옙占쏙옙 타占쏙옙 占쏙옙占쏙옙
 typedef void ( * CommandFunction ) ( const char* pcParameter );

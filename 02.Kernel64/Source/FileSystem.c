@@ -24,6 +24,9 @@ static BYTE gs_vbTempBuffer[ FILESYSTEM_SECTORSPERCLUSTER * 512 ];
 fReadHDDInformation gs_pfReadHDDInformation = NULL;
 fReadHDDSector gs_pfReadHDDSector = NULL;
 fWriteHDDSector gs_pfWriteHDDSector = NULL;
+char prompt_path[100];
+DWORD curClusterIdx = 0;
+
 
 /**
  *  파일 시스템을 초기화
@@ -94,7 +97,10 @@ BOOL kInitializeFileSystem( void )
     }
     return TRUE;
 }
-
+void kSetClusterIndex(DWORD curDirectoryClusterIdx)
+{
+    curClusterIdx = curDirectoryClusterIdx;
+}
 //==============================================================================
 //  저수준 함수(Low Level Function)
 //==============================================================================
@@ -271,7 +277,72 @@ BOOL kGetHDDInformation( HDDINFORMATION* pstInformation)
     
     return bResult;
 }
+void kMakeDot(){
+    DIRECTORYENTRY stEntry;
+    int iDirectoryEntryOffset = 0;
 
+    kMemCpy( stEntry.vcFileName, ".", 2 );
+    stEntry.dwStartClusterIndex = -1;
+    stEntry.dwFileSize = 0;
+    stEntry.type=1;
+    stEntry.parentPath[0] = '/';
+    stEntry.parentPath[1] = '\0';
+    stEntry.parentCluserIdx = 0;
+    
+    if( kSetDirectoryEntryData( iDirectoryEntryOffset, &stEntry ) == FALSE )
+    {
+        
+        return FALSE;
+    }
+
+    kMemCpy( stEntry.vcFileName, "..", 3 );
+    stEntry.dwStartClusterIndex = -2;
+    stEntry.dwFileSize = 0;
+    stEntry.type=1;
+    stEntry.parentPath[0] = '/';
+    stEntry.parentPath[1] = '\0';
+    stEntry.parentCluserIdx = 0;
+   
+    
+    iDirectoryEntryOffset = 1;
+    if( kSetDirectoryEntryData( iDirectoryEntryOffset, &stEntry ) == FALSE )
+    {
+        return FALSE;
+    }
+}
+
+static BOOL kNewDirectory( const char* pcFileName, DIRECTORYENTRY* pstEntry, int* piDirectoryEntryIndex )
+{
+    DWORD dwCluster = kFindFreeCluster();
+    // 세팅 클러스터
+    if( dwCluster == FILESYSTEM_LASTCLUSTER || kSetClusterLinkData( dwCluster, FILESYSTEM_LASTCLUSTER ) == FALSE )
+    {
+        return FALSE;
+    }
+    // 세팅 디렉터리
+    *piDirectoryEntryIndex = kFindFreeDirectoryEntry();
+    if( *piDirectoryEntryIndex == -1 )
+    {
+        kSetClusterLinkData( dwCluster, FILESYSTEM_FREECLUSTER );
+        return FALSE;
+    }    
+    // 세팅 디렉터리 엔트리
+    kMemCpy( pstEntry->vcFileName, pcFileName, kStrLen( pcFileName ) + 1 );
+    pstEntry->dwStartClusterIndex = dwCluster;
+    pstEntry->dwFileSize = 0;
+    pstEntry->type=1;
+    pstEntry->parentPath[0] = '/';
+    pstEntry->parentPath[1] = '\0';
+    pstEntry->parentCluserIdx = 0;
+
+    if( kSetDirectoryEntryData( *piDirectoryEntryIndex, pstEntry ) == FALSE )
+    {
+        kSetClusterLinkData( dwCluster, FILESYSTEM_FREECLUSTER );
+        return FALSE;
+    }
+    kMakeDot();
+    return TRUE;
+}
 /**
  *  클러스터 링크 테이블 내의 오프셋에서 한 섹터를 읽음
  */
@@ -732,7 +803,22 @@ static BOOL kGetClusterLinkData( DWORD dwClusterIndex, DWORD* pdwData )
     *pdwData = ( ( DWORD* ) gs_vbTempBuffer )[ dwClusterIndex % 128 ];
     return TRUE;
 }
+DIRECTORYENTRY* kFindDirectory( DWORD currentCluster )
+{
+    DIRECTORYENTRY* pstEntry = NULL;
+    int i;
 
+    if( kReadCluster( currentCluster, gs_vbTempBuffer ) == FALSE )
+    {
+        return NULL;
+    }
+    pstEntry = ( DIRECTORYENTRY* ) gs_vbTempBuffer;
+    if(pstEntry == NULL)
+        return NULL;
+
+    return pstEntry;
+    
+}
 
 /**
  *  루트 디렉터리에서 빈 디렉터리 엔트리를 반환
@@ -782,7 +868,7 @@ static BOOL kSetDirectoryEntryData( int iIndex, DIRECTORYENTRY* pstEntry )
     }
 
     // 루트 디렉터리를 읽음
-    if( kReadCluster( 0, gs_vbTempBuffer ) == FALSE )
+    if( kReadCluster( curClusterIdx, gs_vbTempBuffer ) == FALSE )
     {
         return FALSE;
     }    
@@ -792,7 +878,7 @@ static BOOL kSetDirectoryEntryData( int iIndex, DIRECTORYENTRY* pstEntry )
     kMemCpy( pstRootEntry + iIndex, pstEntry, sizeof( DIRECTORYENTRY ) );
 
     // 루트 디렉터리에 씀
-    if( kWriteCluster( 0, gs_vbTempBuffer ) == FALSE )
+    if( kWriteCluster( curClusterIdx, gs_vbTempBuffer ) == FALSE )
     {
         return FALSE;
     }    
@@ -1673,9 +1759,24 @@ DIR* kOpenDirectory( const char* pcDirectoryName )
 {
     DIR* pstDirectory;
     DIRECTORYENTRY* pstDirectoryBuffer;
-    
+    DIRECTORYENTRY stEntry;
+    int iDirectoryEntryOffset;
+    int iFileNameLength;
+    DWORD dwSecondCluster;
+    FILE* pstFile;
     // 동기화
     kLock( &( gs_stFileSystemManager.stMutex ) );
+    
+    //Not Root
+    iDirectoryEntryOffset = kFindDirectoryEntry( pcDirectoryName, &stEntry );
+    if( kMemCmp(pcDirectoryName,"/",2)!= 0 && iDirectoryEntryOffset == -1)
+    {
+        if( kNewDirectory( pcDirectoryName, &stEntry, &iDirectoryEntryOffset ) == FALSE )
+        {
+            kUnlock( &( gs_stFileSystemManager.stMutex ) );
+            return NULL;
+        }
+    }    
     
     // 루트 디렉터리 밖에 없으므로 디렉터리 이름은 무시하고 핸들만 할당받아서 반환
     pstDirectory = kAllocateFileDirectoryHandle();

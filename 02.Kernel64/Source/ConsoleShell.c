@@ -3,7 +3,7 @@
  *  date    2009/01/31
  *  author  kkamagui
  *          Copyright(c)2008 All rights reserved by kkamagui
- *  brief   ï¿½Ü¼ï¿½ ï¿½Ğ¿ï¿½ ï¿½ï¿½ï¿½Ãµï¿½ ï¿½Ò½ï¿½ ï¿½ï¿½ï¿½ï¿½
+ *  brief   ??? ?¬á? ????? ??? ????
  */
 
  #include "ConsoleShell.h"
@@ -20,7 +20,9 @@
  #include "FileSystem.h"
 
 
-// Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½Ìºï¿½ ï¿½ï¿½ï¿½ï¿½
+// ¨¨??? ????? ????
+char pwd[150] = "/";
+DWORD curDirectoryClusterIdx = 0;
 SHELLCOMMANDENTRY gs_vstCommandTable[] =
 {
         { "help", "Show Help", kHelp },
@@ -68,14 +70,15 @@ SHELLCOMMANDENTRY gs_vstCommandTable[] =
         { "testfileio", "Test File I/O Function", kTestFileIO },
         { "testperformance", "Test File Read/WritePerformance", kTestPerformance },
         { "flush", "Flush File System Cache", kFlushCache },
+        { "mkdir", "Make Dir", kMkdir},
 
 };
 
 //==============================================================================
-//  ì‹¤ì œ ì…¸ì„ êµ¬ì„±í•˜ëŠ” ì½”ë“œ
+//  ½ÇÁ¦ ¼ĞÀ» ±¸¼ºÇÏ´Â ÄÚµå
 //==============================================================================
 /**
- *  ì…¸ì˜ ë©”ì¸ ë£¨í”„
+ *  ¼ĞÀÇ ¸ŞÀÎ ·çÇÁ
  */
 void kStartConsoleShell( void )
 {
@@ -92,36 +95,39 @@ void kStartConsoleShell( void )
     int hisfull = 0;
     int cursorFirst;
     int count = -1;
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½
+    // ??????? ???
     kPrintf( CONSOLESHELL_PROMPTMESSAGE );
+    kPrintf(pwd);
+    kPrintf(">");
+    kSetClusterIndex(curDirectoryClusterIdx);
     kGetCursor(&iCursorX, &iCursorY);
     cursorFirst = iCursorX;
     while( 1 )
     {
-        // Å°ï¿½ï¿½ ï¿½ï¿½ï¿½Åµï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+        // ??? ????? ?????? ???
         bKey = kGetCh();
         if(bKey!=KEY_TAB) tabCnt=0;
-        // Backspace Å° Ã³ï¿½ï¿½
+        // Backspace ? ???
         if( bKey == KEY_BACKSPACE )
         {
             if( iCommandBufferIndex > 0 )
             {
-                // ï¿½ï¿½ï¿½ï¿½ Ä¿ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ ï¿½ï¿½î¼­ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ìµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°ï¿½
-                // Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½Û¿ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+                // ???? ¨¨?? ????? ??? ?? ???? ?????? ????? ???? ?????? ??????
+                // ¨¨??? ??????? ?????? ???? ????
                 kGetCursor( &iCursorX, &iCursorY );
                 kPrintStringXY( iCursorX - 1, iCursorY, " " );
                 kSetCursor( iCursorX - 1, iCursorY );
                 iCommandBufferIndex--;
             }
         }
-        // ï¿½ï¿½ï¿½ï¿½ Å° Ã³ï¿½ï¿½
+        // ???? ? ???
         else if( bKey == KEY_ENTER )
         {
             kPrintf( "\n" );
 
             if( iCommandBufferIndex > 0 )
             {
-                // Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½Û¿ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+                // ¨¨??? ????? ??? ?????? ????
                 vcCommandBuffer[ iCommandBufferIndex ] = '\0';
                 count = -1;
                 hishead++;
@@ -138,12 +144,12 @@ void kStartConsoleShell( void )
                 kExecuteCommand( vcCommandBuffer );
             }
 
-            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ ï¿½ï¿½ Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
+            // ??????? ??? ?? ¨¨??? ???? ????
             kPrintf( "%s", CONSOLESHELL_PROMPTMESSAGE );
             kMemSet( vcCommandBuffer, '\0', CONSOLESHELL_MAXCOMMANDBUFFERCOUNT );
             iCommandBufferIndex = 0;
         }
-        // ï¿½ï¿½ï¿½ï¿½Æ® Å°, CAPS Lock, NUM Lock, Scroll Lockï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+        // ????? ?, CAPS Lock, NUM Lock, Scroll Lock?? ????
         else if( ( bKey == KEY_LSHIFT ) || ( bKey == KEY_RSHIFT ) ||
                  ( bKey == KEY_CAPSLOCK ) || ( bKey == KEY_NUMLOCK ) ||
                  ( bKey == KEY_SCROLLLOCK ) )
@@ -266,7 +272,7 @@ void kStartConsoleShell( void )
         }
         else
         {
-            // ï¿½ï¿½ï¿½Û¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+            // ????? ?????? ???????? ???? ????
             if( iCommandBufferIndex < CONSOLESHELL_MAXCOMMANDBUFFERCOUNT )
             {
                 vcCommandBuffer[ iCommandBufferIndex++ ] = bKey;
@@ -277,7 +283,7 @@ void kStartConsoleShell( void )
 }
 
 /*
- *  Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½Û¿ï¿½ ï¿½Ö´ï¿½ Ä¿ï¿½Çµå¸¦ ï¿½ï¿½ï¿½Ï¿ï¿½ ï¿½Ø´ï¿½ Ä¿ï¿½Çµå¸¦ Ã³ï¿½ï¿½ï¿½Ï´ï¿½ ï¿½Ô¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+ *  ¨¨??? ????? ??? ¨¨??? ????? ??? ¨¨??? ?????? ????? ????
  */
 void kExecuteCommand( const char* pcCommandBuffer )
 {
@@ -285,7 +291,7 @@ void kExecuteCommand( const char* pcCommandBuffer )
     int iCommandBufferLength, iCommandLength;
     int iCount;
 
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ğµï¿½ Ä¿ï¿½Çµå¸¦ ï¿½ï¿½ï¿½ï¿½
+    // ???????? ???¬Ö? ¨¨??? ????
     iCommandBufferLength = kStrLen( pcCommandBuffer );
     for( iSpaceIndex = 0 ; iSpaceIndex < iCommandBufferLength ; iSpaceIndex++ )
     {
@@ -295,12 +301,12 @@ void kExecuteCommand( const char* pcCommandBuffer )
         }
     }
 
-    // Ä¿ï¿½Çµï¿½ ï¿½ï¿½ï¿½Ìºï¿½ï¿½ï¿½ ï¿½Ë»ï¿½ï¿½Ø¼ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ Ä¿ï¿½Çµå°¡ ï¿½Ö´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
+    // ¨¨??? ??????? ?????? ?????? ????? ¨¨??? ????? ???
     iCount = sizeof( gs_vstCommandTable ) / sizeof( SHELLCOMMANDENTRY );
     for( i = 0 ; i < iCount ; i++ )
     {
         iCommandLength = kStrLen( gs_vstCommandTable[ i ].pcCommand );
-        // Ä¿ï¿½Çµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¿ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½Ï´ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½
+        // ¨¨????? ????? ?????? ?????? ???????? ???
         if( ( iCommandLength == iSpaceIndex ) &&
             ( kMemCmp( gs_vstCommandTable[ i ].pcCommand, pcCommandBuffer,
                        iSpaceIndex ) == 0 ) )
@@ -310,7 +316,7 @@ void kExecuteCommand( const char* pcCommandBuffer )
         }
     }
 
-    // ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
+    // ????????? ??? ?? ????? ???? ???
     if( i >= iCount )
     {
         kPrintf( "'%s' is not found.\n", pcCommandBuffer );
@@ -318,7 +324,7 @@ void kExecuteCommand( const char* pcCommandBuffer )
 }
 
 /**
- *  ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ ï¿½Ú·á±¸ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
+ *  ?????? ??????? ????
  */
 void kInitializeParameter( PARAMETERLIST* pstList, const char* pcParameter )
 {
@@ -328,20 +334,20 @@ void kInitializeParameter( PARAMETERLIST* pstList, const char* pcParameter )
 }
 
 /**
- *  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ğµï¿½ ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½È¯
+ *  ???????? ???¬Ö? ???????? ????? ????? ???
  */
 int kGetNextParameter( PARAMETERLIST* pstList, char* pcParameter )
 {
     int i;
     int iLength;
 
-    // ï¿½ï¿½ ï¿½Ì»ï¿½ ï¿½Ä¶ï¿½ï¿½ï¿½Í°ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+    // ?? ??? ??????? ?????? ????
     if( pstList->iLength <= pstList->iCurrentPosition )
     {
         return 0;
     }
 
-    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¸ï¿½Å­ ï¿½Ìµï¿½ï¿½Ï¸é¼­ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ë»ï¿½
+    // ?????? ?????? ?????? ?????? ???
     for( i = pstList->iCurrentPosition ; i < pstList->iLength ; i++ )
     {
         if( pstList->pcBuffer[ i ] == ' ' )
@@ -350,21 +356,21 @@ int kGetNextParameter( PARAMETERLIST* pstList, char* pcParameter )
         }
     }
 
-    // ï¿½Ä¶ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ ï¿½ï¿½ï¿½Ì¸ï¿½ ï¿½ï¿½È¯
+    // ??????? ??????? ????? ???
     kMemCpy( pcParameter, pstList->pcBuffer + pstList->iCurrentPosition, i );
     iLength = i - pstList->iCurrentPosition;
     pcParameter[ iLength ] = '\0';
 
-    // ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®
+    // ???????? ??? ???????
     pstList->iCurrentPosition += iLength + 1;
     return iLength;
 }
 
 //==============================================================================
-//  ì»¤ë§¨ë“œë¥¼ ì²˜ë¦¬í•˜ëŠ” ì½”ë“œ
+//  Ä¿¸Çµå¸¦ Ã³¸®ÇÏ´Â ÄÚµå
 //==============================================================================
 /**
- *  ì…¸ ë„ì›€ë§ì„ ì¶œë ¥
+ *  ¼Ğ µµ¿ò¸»À» Ãâ·Â
  */
 static void kHelp( const char* pcCommandBuffer )
 {
@@ -380,7 +386,7 @@ static void kHelp( const char* pcCommandBuffer )
 
     iCount = sizeof( gs_vstCommandTable ) / sizeof( SHELLCOMMANDENTRY );
 
-    // ê°€ì¥ ê¸´ ì»¤ë§¨ë“œì˜ ê¸¸ì´ë¥¼ ê³„ì‚°
+    // °¡Àå ±ä Ä¿¸ÇµåÀÇ ±æÀÌ¸¦ °è»ê
     for( i = 0 ; i < iCount ; i++ )
     {
         iLength = kStrLen( gs_vstCommandTable[ i ].pcCommand );
@@ -390,7 +396,7 @@ static void kHelp( const char* pcCommandBuffer )
         }
     }
 
-    // ë„ì›€ë§ ì¶œë ¥
+    // µµ¿ò¸» Ãâ·Â
     for( i = 0 ; i < iCount ; i++ )
     {
         kPrintf( "%s", gs_vstCommandTable[ i ].pcCommand );
@@ -398,7 +404,7 @@ static void kHelp( const char* pcCommandBuffer )
         kSetCursor( iMaxCommandLength, iCursorY );
         kPrintf( "  - %s\n", gs_vstCommandTable[ i ].pcHelp );
 
-        // ëª©ë¡ì´ ë§ì„ ê²½ìš° ë‚˜ëˆ ì„œ ë³´ì—¬ì¤Œ
+        // ¸ñ·ÏÀÌ ¸¹À» °æ¿ì ³ª´²¼­ º¸¿©ÁÜ
         if( ( i != 0 ) && ( ( i % 20 ) == 0 ) )
         {
             kPrintf( "Press any key to continue... ('q' is exit) : " );
@@ -413,17 +419,17 @@ static void kHelp( const char* pcCommandBuffer )
 }
 
 /**
- *  È­ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
+ *  ????? ????
  */
 static void kCls( const char* pcParameterBuffer )
 {
-    // ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï¹Ç·ï¿½ È­ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½ï¿½ï¿½ï¿½ 1ï¿½ï¿½ Ä¿ï¿½ï¿½ ï¿½Ìµï¿½
+    // ?? ?????? ????? ?????? ??????? ????? ???? ??, ???? 1?? ¨¨?? ???
     kClearScreen();
     kSetCursor( 0, 1 );
 }
 
 /**
- *  ï¿½ï¿½ ï¿½Ş¸ï¿½ Å©ï¿½â¸¦ ï¿½ï¿½ï¿½
+ *  ?? ??? ??? ???
  */
 static void kShowTotalRAMSize( const char* pcParameterBuffer )
 {
@@ -431,7 +437,7 @@ static void kShowTotalRAMSize( const char* pcParameterBuffer )
 }
 
 /**
- *  ï¿½ï¿½ï¿½Ú¿ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Ú¸ï¿½ ï¿½ï¿½ï¿½Ú·ï¿½ ï¿½ï¿½È¯ï¿½Ï¿ï¿½ È­ï¿½é¿¡ ï¿½ï¿½ï¿½
+ *  ??????? ?? ????? ????? ?????? ??? ???
  */
 static void kStringToDecimalHexTest( const char* pcParameterBuffer )
 {
@@ -441,25 +447,25 @@ static void kStringToDecimalHexTest( const char* pcParameterBuffer )
     int iCount = 0;
     long lValue;
 
-    // ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ ï¿½Ê±ï¿½È­
+    // ?????? ????
     kInitializeParameter( &stList, pcParameterBuffer );
 
     while( 1 )
     {
-        // ï¿½ï¿½ï¿½ï¿½ ï¿½Ä¶ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½, ï¿½Ä¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì°ï¿½ 0ï¿½Ì¸ï¿½ ï¿½Ä¶ï¿½ï¿½ï¿½Í°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ì¹Ç·ï¿½
-        // ï¿½ï¿½ï¿½ï¿½
+        // ???? ??????? ????, ???????? ????? 0??? ??????? ???? ??????
+        // ????
         iLength = kGetNextParameter( &stList, vcParameter );
         if( iLength == 0 )
         {
             break;
         }
 
-        // ï¿½Ä¶ï¿½ï¿½ï¿½Í¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ 16ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 10ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½È¯ï¿½ï¿½ ï¿½ï¿½
-        // ï¿½ï¿½ï¿½ï¿½ï¿½ printfï¿½ï¿½ ï¿½ï¿½ï¿½
+        // ??????? ???? ?????? ?????? 16???????? 10???????? ?????? ????? ??
+        // ????? printf?? ???
         kPrintf( "Param %d = '%s', Length = %d, ", iCount + 1,
                  vcParameter, iLength );
 
-        // 0xï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ 16ï¿½ï¿½ï¿½ï¿½, ï¿½×¿Ü´ï¿½ 10ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ç´ï¿½
+        // 0x?? ??????? 16????, ???? 10?????? ???
         if( kMemCmp( vcParameter, "0x", 2 ) == 0 )
         {
             lValue = kAToI( vcParameter + 2, 16 );
@@ -476,13 +482,13 @@ static void kStringToDecimalHexTest( const char* pcParameterBuffer )
 }
 
 /**
- *  PCï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½(Reboot)
+ *  PC?? ?????(Reboot)
  */
 static void kShutdown( const char* pcParamegerBuffer )
 {
     kPrintf( "System Shutdown Start...\n" );
 
-    // Å°ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Æ®ï¿½Ñ·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ PCï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
+    // ????? ???????? ???? PC?? ?????
     kPrintf( "Press Any Key To Reboot PC..." );
     kGetCh();
     kReboot();
@@ -506,7 +512,7 @@ static void kRaiseFault(){
 }
 
 /**
- *  PIT ì»¨íŠ¸ë¡¤ëŸ¬ì˜ ì¹´ìš´í„° 0 ì„¤ì •
+ *  PIT ÄÁÆ®·Ñ·¯ÀÇ Ä«¿îÅÍ 0 ¼³Á¤
  */
 static void kSetTimer( const char* pcParameterBuffer )
 {
@@ -515,10 +521,10 @@ static void kSetTimer( const char* pcParameterBuffer )
     long lValue;
     BOOL bPeriodic;
 
-    // íŒŒë¼ë¯¸í„° ì´ˆê¸°í™”
+    // ÆÄ¶ó¹ÌÅÍ ÃÊ±âÈ­
     kInitializeParameter( &stList, pcParameterBuffer );
 
-    // milisecond ì¶”ì¶œ
+    // milisecond ÃßÃâ
     if( kGetNextParameter( &stList, vcParameter ) == 0 )
     {
         kPrintf( "ex)settimer 10(ms) 1(periodic)\n" );
@@ -526,7 +532,7 @@ static void kSetTimer( const char* pcParameterBuffer )
     }
     lValue = kAToI( vcParameter, 10 );
 
-    // Periodic ì¶”ì¶œ
+    // Periodic ÃßÃâ
     if( kGetNextParameter( &stList, vcParameter ) == 0 )
     {
         kPrintf( "ex)settimer 10(ms) 1(periodic)\n" );
@@ -539,7 +545,7 @@ static void kSetTimer( const char* pcParameterBuffer )
 }
 
 /**
- *  PIT ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ ì§ì ‘ ì‚¬ìš©í•˜ì—¬ ms ë™ì•ˆ ëŒ€ê¸°
+ *  PIT ÄÁÆ®·Ñ·¯¸¦ Á÷Á¢ »ç¿ëÇÏ¿© ms µ¿¾È ´ë±â
  */
 static void kWaitUsingPIT( const char* pcParameterBuffer )
 {
@@ -549,7 +555,7 @@ static void kWaitUsingPIT( const char* pcParameterBuffer )
     long lMillisecond;
     int i;
 
-    // íŒŒë¼ë¯¸í„° ì´ˆê¸°í™”
+    // ÆÄ¶ó¹ÌÅÍ ÃÊ±âÈ­
     kInitializeParameter( &stList, pcParameterBuffer );
     if( kGetNextParameter( &stList, vcParameter ) == 0 )
     {
@@ -560,7 +566,7 @@ static void kWaitUsingPIT( const char* pcParameterBuffer )
     lMillisecond = kAToI( pcParameterBuffer, 10 );
     kPrintf( "%d ms Sleep Start...\n", lMillisecond );
 
-    // ì¸í„°ëŸ½íŠ¸ë¥¼ ë¹„í™œì„±í™”í•˜ê³  PIT ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ í†µí•´ ì§ì ‘ ì‹œê°„ì„ ì¸¡ì •
+    // ÀÎÅÍ·´Æ®¸¦ ºñÈ°¼ºÈ­ÇÏ°í PIT ÄÁÆ®·Ñ·¯¸¦ ÅëÇØ Á÷Á¢ ½Ã°£À» ÃøÁ¤
     kDisableInterrupt();
     for( i = 0 ; i < lMillisecond / 30 ; i++ )
     {
@@ -570,12 +576,12 @@ static void kWaitUsingPIT( const char* pcParameterBuffer )
     kEnableInterrupt();
     kPrintf( "%d ms Sleep Complete\n", lMillisecond );
 
-    // íƒ€ì´ë¨¸ ë³µì›
+    // Å¸ÀÌ¸Ó º¹¿ø
     kInitializePIT( MSTOCOUNT( 1 ), TRUE );
 }
 
 /**
- *  íƒ€ì„ ìŠ¤íƒ¬í”„ ì¹´ìš´í„°ë¥¼ ì½ìŒ
+ *  Å¸ÀÓ ½ºÅÆÇÁ Ä«¿îÅÍ¸¦ ÀĞÀ½
  */
 static void kReadTimeStampCounter( const char* pcParameterBuffer )
 {
@@ -586,7 +592,7 @@ static void kReadTimeStampCounter( const char* pcParameterBuffer )
 }
 
 /**
- *  í”„ë¡œì„¸ì„œì˜ ì†ë„ë¥¼ ì¸¡ì •
+ *  ÇÁ·Î¼¼¼­ÀÇ ¼Óµµ¸¦ ÃøÁ¤
  */
 static void kMeasureProcessorSpeed( const char* pcParameterBuffer )
 {
@@ -595,7 +601,7 @@ static void kMeasureProcessorSpeed( const char* pcParameterBuffer )
 
     kPrintf( "Now Measuring." );
 
-    // 10ì´ˆ ë™ì•ˆ ë³€í™”í•œ íƒ€ì„ ìŠ¤íƒ¬í”„ ì¹´ìš´í„°ë¥¼ ì´ìš©í•˜ì—¬ í”„ë¡œì„¸ì„œì˜ ì†ë„ë¥¼ ê°„ì ‘ì ìœ¼ë¡œ ì¸¡ì •
+    // 10ÃÊ µ¿¾È º¯È­ÇÑ Å¸ÀÓ ½ºÅÆÇÁ Ä«¿îÅÍ¸¦ ÀÌ¿ëÇÏ¿© ÇÁ·Î¼¼¼­ÀÇ ¼Óµµ¸¦ °£Á¢ÀûÀ¸·Î ÃøÁ¤
     kDisableInterrupt();
     for( i = 0 ; i < 200 ; i++ )
     {
@@ -605,7 +611,7 @@ static void kMeasureProcessorSpeed( const char* pcParameterBuffer )
 
         kPrintf( "." );
     }
-    // íƒ€ì´ë¨¸ ë³µì›
+    // Å¸ÀÌ¸Ó º¹¿ø
     kInitializePIT( MSTOCOUNT( 1 ), TRUE );
     kEnableInterrupt();
 
@@ -613,7 +619,7 @@ static void kMeasureProcessorSpeed( const char* pcParameterBuffer )
 }
 
 /**
- *  RTC ì»¨íŠ¸ë¡¤ëŸ¬ì— ì €ì¥ëœ ì¼ì ë° ì‹œê°„ ì •ë³´ë¥¼ í‘œì‹œ
+ *  RTC ÄÁÆ®·Ñ·¯¿¡ ÀúÀåµÈ ÀÏÀÚ ¹× ½Ã°£ Á¤º¸¸¦ Ç¥½Ã
  */
 static void kShowDateAndTime( const char* pcParameterBuffer )
 {
@@ -621,7 +627,7 @@ static void kShowDateAndTime( const char* pcParameterBuffer )
     BYTE bDayOfWeek, bDayOfMonth, bMonth;
     WORD wYear;
 
-    // RTC ì»¨íŠ¸ë¡¤ëŸ¬ì—ì„œ ì‹œê°„ ë° ì¼ìë¥¼ ì½ìŒ
+    // RTC ÄÁÆ®·Ñ·¯¿¡¼­ ½Ã°£ ¹× ÀÏÀÚ¸¦ ÀĞÀ½
     kReadRTCTime( &bHour, &bMinute, &bSecond );
     kReadRTCDate( &wYear, &bMonth, &bDayOfMonth, &bDayOfWeek );
 
@@ -631,8 +637,8 @@ static void kShowDateAndTime( const char* pcParameterBuffer )
 }
 
 /**
- *  íƒœìŠ¤í¬ 1
- *      í™”ë©´ í…Œë‘ë¦¬ë¥¼ ëŒë©´ì„œ ë¬¸ìë¥¼ ì¶œë ¥
+ *  ÅÂ½ºÅ© 1
+ *      È­¸é Å×µÎ¸®¸¦ µ¹¸é¼­ ¹®ÀÚ¸¦ Ãâ·Â
  */
 static void kTestTask1( void )
 {
@@ -641,11 +647,11 @@ static void kTestTask1( void )
     CHARACTER* pstScreen = ( CHARACTER* ) CONSOLE_VIDEOMEMORYADDRESS;
     TCB* pstRunningTask;
 
-    // ìì‹ ì˜ IDë¥¼ ì–»ì–´ì„œ í™”ë©´ ì˜¤í”„ì…‹ìœ¼ë¡œ ì‚¬ìš©
+    // ÀÚ½ÅÀÇ ID¸¦ ¾ò¾î¼­ È­¸é ¿ÀÇÁ¼ÂÀ¸·Î »ç¿ë
     pstRunningTask = kGetRunningTask();
     iMargin = ( pstRunningTask->stLink.qwID & 0xFFFFFFFF ) % 10;
 
-    // í™”ë©´ ë„¤ ê·€í‰ì´ë¥¼ ëŒë©´ì„œ ë¬¸ì ì¶œë ¥
+    // È­¸é ³× ±ÍÅüÀÌ¸¦ µ¹¸é¼­ ¹®ÀÚ Ãâ·Â
     for( j = 0 ; j < 20000 ; j++ )
     {
         switch( i )
@@ -683,12 +689,12 @@ static void kTestTask1( void )
             break;
         }
 
-        // ë¬¸ì ë° ìƒ‰ê¹” ì§€ì •
+        // ¹®ÀÚ ¹× »ö±ò ÁöÁ¤
         pstScreen[ iY * CONSOLE_WIDTH + iX ].bCharactor = bData;
         pstScreen[ iY * CONSOLE_WIDTH + iX ].bAttribute = bData & 0x0F;
         bData++;
 
-        // ë‹¤ë¥¸ íƒœìŠ¤í¬ë¡œ ì „í™˜
+        // ´Ù¸¥ ÅÂ½ºÅ©·Î ÀüÈ¯
         //kSchedule();
     }
 
@@ -696,8 +702,8 @@ static void kTestTask1( void )
 }
 
 /**
- *  íƒœìŠ¤í¬ 2
- *      ìì‹ ì˜ IDë¥¼ ì°¸ê³ í•˜ì—¬ íŠ¹ì • ìœ„ì¹˜ì— íšŒì „í•˜ëŠ” ë°”ëŒê°œë¹„ë¥¼ ì¶œë ¥
+ *  ÅÂ½ºÅ© 2
+ *      ÀÚ½ÅÀÇ ID¸¦ Âü°íÇÏ¿© Æ¯Á¤ À§Ä¡¿¡ È¸ÀüÇÏ´Â ¹Ù¶÷°³ºñ¸¦ Ãâ·Â
  */
 static void kTestTask2( void )
 {
@@ -706,7 +712,7 @@ static void kTestTask2( void )
     TCB* pstRunningTask;
     char vcData[ 4 ] = { '-', '\\', '|', '/' };
 
-    // ìì‹ ì˜ IDë¥¼ ì–»ì–´ì„œ í™”ë©´ ì˜¤í”„ì…‹ìœ¼ë¡œ ì‚¬ìš©
+    // ÀÚ½ÅÀÇ ID¸¦ ¾ò¾î¼­ È­¸é ¿ÀÇÁ¼ÂÀ¸·Î »ç¿ë
     pstRunningTask = kGetRunningTask();
     iOffset = ( pstRunningTask->stLink.qwID & 0xFFFFFFFF ) * 2;
     iOffset = CONSOLE_WIDTH * CONSOLE_HEIGHT -
@@ -714,19 +720,19 @@ static void kTestTask2( void )
 
     while( 1 )
     {
-        // íšŒì „í•˜ëŠ” ë°”ëŒê°œë¹„ë¥¼ í‘œì‹œ
+        // È¸ÀüÇÏ´Â ¹Ù¶÷°³ºñ¸¦ Ç¥½Ã
         pstScreen[ iOffset ].bCharactor = vcData[ i % 4 ];
-        // ìƒ‰ê¹” ì§€ì •
+        // »ö±ò ÁöÁ¤
         pstScreen[ iOffset ].bAttribute = ( iOffset % 15 ) + 1;
         i++;
 
-        // ë‹¤ë¥¸ íƒœìŠ¤í¬ë¡œ ì „í™˜
+        // ´Ù¸¥ ÅÂ½ºÅ©·Î ÀüÈ¯
         //kSchedule();
     }
 }
 
 /**
- *  íƒœìŠ¤í¬ë¥¼ ìƒì„±í•´ì„œ ë©€í‹° íƒœìŠ¤í‚¹ ìˆ˜í–‰
+ *  ÅÂ½ºÅ©¸¦ »ı¼ºÇØ¼­ ¸ÖÆ¼ ÅÂ½ºÅ· ¼öÇà
  */
 static void kCreateTestTask( const char* pcParameterBuffer )
 {
@@ -735,14 +741,14 @@ static void kCreateTestTask( const char* pcParameterBuffer )
     char vcCount[ 30 ];
     int i;
 
-    // íŒŒë¼ë¯¸í„°ë¥¼ ì¶”ì¶œ
+    // ÆÄ¶ó¹ÌÅÍ¸¦ ÃßÃâ
     kInitializeParameter( &stList, pcParameterBuffer );
     kGetNextParameter( &stList, vcType );
     kGetNextParameter( &stList, vcCount );
 
     switch( kAToI( vcType, 10 ) )
     {
-    // íƒ€ì… 1 íƒœìŠ¤í¬ ìƒì„±
+    // Å¸ÀÔ 1 ÅÂ½ºÅ© »ı¼º
     case 1:
         for( i = 0 ; i < kAToI( vcCount, 10 ) ; i++ )
         {
@@ -755,7 +761,7 @@ static void kCreateTestTask( const char* pcParameterBuffer )
         kPrintf( "Task1 %d Created\n", i );
         break;
 
-    // íƒ€ì… 2 íƒœìŠ¤í¬ ìƒì„±
+    // Å¸ÀÔ 2 ÅÂ½ºÅ© »ı¼º
     case 2:
     default:
         for( i = 0 ; i < kAToI( vcCount, 10 ) ; i++ )
@@ -771,7 +777,7 @@ static void kCreateTestTask( const char* pcParameterBuffer )
 }
 
 /**
- *  íƒœìŠ¤í¬ì˜ ìš°ì„  ìˆœìœ„ë¥¼ ë³€ê²½
+ *  ÅÂ½ºÅ©ÀÇ ¿ì¼± ¼øÀ§¸¦ º¯°æ
  */
 static void kChangeTaskPriority( const char* pcParameterBuffer )
 {
@@ -781,12 +787,12 @@ static void kChangeTaskPriority( const char* pcParameterBuffer )
     QWORD qwID;
     BYTE bPriority;
 
-    // íŒŒë¼ë¯¸í„°ë¥¼ ì¶”ì¶œ
+    // ÆÄ¶ó¹ÌÅÍ¸¦ ÃßÃâ
     kInitializeParameter( &stList, pcParameterBuffer );
     kGetNextParameter( &stList, vcID );
     kGetNextParameter( &stList, vcPriority );
 
-    // íƒœìŠ¤í¬ì˜ ìš°ì„  ìˆœìœ„ë¥¼ ë³€ê²½
+    // ÅÂ½ºÅ©ÀÇ ¿ì¼± ¼øÀ§¸¦ º¯°æ
     if( kMemCmp( vcID, "0x", 2 ) == 0 )
     {
         qwID = kAToI( vcID + 2, 16 );
@@ -810,7 +816,7 @@ static void kChangeTaskPriority( const char* pcParameterBuffer )
 }
 
 /**
- *  í˜„ì¬ ìƒì„±ëœ ëª¨ë“  íƒœìŠ¤í¬ì˜ ì •ë³´ë¥¼ ì¶œë ¥
+ *  ÇöÀç »ı¼ºµÈ ¸ğµç ÅÂ½ºÅ©ÀÇ Á¤º¸¸¦ Ãâ·Â
  */
 static void kShowTaskList( const char* pcParameterBuffer )
 {
@@ -821,11 +827,11 @@ static void kShowTaskList( const char* pcParameterBuffer )
     kPrintf( "=========== Task Total Count [%d] ===========\n", kGetTaskCount() );
     for( i = 0 ; i < TASK_MAXCOUNT ; i++ )
     {
-        // TCBë¥¼ êµ¬í•´ì„œ TCBê°€ ì‚¬ìš© ì¤‘ì´ë©´ IDë¥¼ ì¶œë ¥
+        // TCB¸¦ ±¸ÇØ¼­ TCB°¡ »ç¿ë ÁßÀÌ¸é ID¸¦ Ãâ·Â
         pstTCB = kGetTCBInTCBPool( i );
         if( ( pstTCB->stLink.qwID >> 32 ) != 0 )
         {
-            // íƒœìŠ¤í¬ê°€ 10ê°œ ì¶œë ¥ë  ë•Œë§ˆë‹¤, ê³„ì† íƒœìŠ¤í¬ ì •ë³´ë¥¼ í‘œì‹œí• ì§€ ì—¬ë¶€ë¥¼ í™•ì¸
+            // ÅÂ½ºÅ©°¡ 10°³ Ãâ·ÂµÉ ¶§¸¶´Ù, °è¼Ó ÅÂ½ºÅ© Á¤º¸¸¦ Ç¥½ÃÇÒÁö ¿©ºÎ¸¦ È®ÀÎ
             if( ( iCount != 0 ) && ( ( iCount % 10 ) == 0 ) )
             {
                 kPrintf( "Press any key to continue... ('q' is exit) : " );
@@ -847,7 +853,7 @@ static void kShowTaskList( const char* pcParameterBuffer )
 }
 
 /**
- *  íƒœìŠ¤í¬ë¥¼ ì¢…ë£Œ
+ *  ÅÂ½ºÅ©¸¦ Á¾·á
  */
 static void kKillTask( const char* pcParameterBuffer )
 {
@@ -857,11 +863,11 @@ static void kKillTask( const char* pcParameterBuffer )
     TCB* pstTCB;
     int i;
 
-    // íŒŒë¼ë¯¸í„°ë¥¼ ì¶”ì¶œ
+    // ÆÄ¶ó¹ÌÅÍ¸¦ ÃßÃâ
     kInitializeParameter( &stList, pcParameterBuffer );
     kGetNextParameter( &stList, vcID );
 
-    // íƒœìŠ¤í¬ë¥¼ ì¢…ë£Œ
+    // ÅÂ½ºÅ©¸¦ Á¾·á
     if( kMemCmp( vcID, "0x", 2 ) == 0 )
     {
         qwID = kAToI( vcID + 2, 16 );
@@ -871,13 +877,13 @@ static void kKillTask( const char* pcParameterBuffer )
         qwID = kAToI( vcID, 10 );
     }
 
-    // íŠ¹ì • IDë§Œ ì¢…ë£Œí•˜ëŠ” ê²½ìš°
+    // Æ¯Á¤ ID¸¸ Á¾·áÇÏ´Â °æ¿ì
     if( qwID != 0xFFFFFFFF )
     {
         pstTCB = kGetTCBInTCBPool( GETTCBOFFSET( qwID ) );
         qwID = pstTCB->stLink.qwID;
 
-        // ì‹œìŠ¤í…œ í…ŒìŠ¤íŠ¸ëŠ” ì œì™¸
+        // ½Ã½ºÅÛ Å×½ºÆ®´Â Á¦¿Ü
         if( ( ( qwID >> 32 ) != 0 ) && ( ( pstTCB->qwFlags & TASK_FLAGS_SYSTEM ) == 0x00 ) )
         {
             kPrintf( "Kill Task ID [0x%q] ", qwID );
@@ -895,7 +901,7 @@ static void kKillTask( const char* pcParameterBuffer )
             kPrintf( "Task does not exist or task is system task\n" );
         }
     }
-    // ì½˜ì†” ì…¸ê³¼ ìœ íœ´ íƒœìŠ¤í¬ë¥¼ ì œì™¸í•˜ê³  ëª¨ë“  íƒœìŠ¤í¬ ì¢…ë£Œ
+    // ÄÜ¼Ö ¼Ğ°ú À¯ÈŞ ÅÂ½ºÅ©¸¦ Á¦¿ÜÇÏ°í ¸ğµç ÅÂ½ºÅ© Á¾·á
     else
     {
         for( i = 0 ; i < TASK_MAXCOUNT ; i++ )
@@ -903,7 +909,7 @@ static void kKillTask( const char* pcParameterBuffer )
             pstTCB = kGetTCBInTCBPool( i );
             qwID = pstTCB->stLink.qwID;
 
-            // ì‹œìŠ¤í…œ í…ŒìŠ¤íŠ¸ëŠ” ì‚­ì œ ëª©ë¡ì—ì„œ ì œì™¸
+            // ½Ã½ºÅÛ Å×½ºÆ®´Â »èÁ¦ ¸ñ·Ï¿¡¼­ Á¦¿Ü
             if( ( ( qwID >> 32 ) != 0 ) && ( ( pstTCB->qwFlags & TASK_FLAGS_SYSTEM ) == 0x00 ) )
             {
                 kPrintf( "Kill Task ID [0x%q] ", qwID );
@@ -921,19 +927,19 @@ static void kKillTask( const char* pcParameterBuffer )
 }
 
 /**
- *  í”„ë¡œì„¸ì„œì˜ ì‚¬ìš©ë¥ ì„ í‘œì‹œ
+ *  ÇÁ·Î¼¼¼­ÀÇ »ç¿ë·üÀ» Ç¥½Ã
  */
 static void kCPULoad( const char* pcParameterBuffer )
 {
     kPrintf( "Processor Load : %d%%\n", kGetProcessorLoad() );
 }
 
-// ë®¤í…ìŠ¤ í…ŒìŠ¤íŠ¸ìš© ë®¤í…ìŠ¤ì™€ ë³€ìˆ˜
+// ¹ÂÅØ½º Å×½ºÆ®¿ë ¹ÂÅØ½º¿Í º¯¼ö
 static MUTEX gs_stMutex;
 static volatile QWORD gs_qwAdder;
 
 /**
- *  ë®¤í…ìŠ¤ë¥¼ í…ŒìŠ¤íŠ¸í•˜ëŠ” íƒœìŠ¤í¬
+ *  ¹ÂÅØ½º¸¦ Å×½ºÆ®ÇÏ´Â ÅÂ½ºÅ©
  */
 static void kPrintNumberTask( void )
 {
@@ -941,14 +947,14 @@ static void kPrintNumberTask( void )
     int j;
     QWORD qwTickCount;
 
-    // 50ms ì •ë„ ëŒ€ê¸°í•˜ì—¬ ì½˜ì†” ì…¸ì´ ì¶œë ¥í•˜ëŠ” ë©”ì‹œì§€ì™€ ê²¹ì¹˜ì§€ ì•Šë„ë¡ í•¨
+    // 50ms Á¤µµ ´ë±âÇÏ¿© ÄÜ¼Ö ¼ĞÀÌ Ãâ·ÂÇÏ´Â ¸Ş½ÃÁö¿Í °ãÄ¡Áö ¾Êµµ·Ï ÇÔ
     qwTickCount = kGetTickCount();
     while( ( kGetTickCount() - qwTickCount ) < 50 )
     {
         kSchedule();
     }
 
-    // ë£¨í”„ë¥¼ ëŒë©´ì„œ ìˆ«ìë¥¼ ì¶œë ¥
+    // ·çÇÁ¸¦ µ¹¸é¼­ ¼ıÀÚ¸¦ Ãâ·Â
     for( i = 0 ; i < 5 ; i++ )
     {
         kLock( &( gs_stMutex ) );
@@ -958,23 +964,23 @@ static void kPrintNumberTask( void )
         gs_qwAdder += 1;
         kUnlock( & ( gs_stMutex ) );
 
-        // í”„ë¡œì„¸ì„œ ì†Œëª¨ë¥¼ ëŠ˜ë¦¬ë ¤ê³  ì¶”ê°€í•œ ì½”ë“œ
+        // ÇÁ·Î¼¼¼­ ¼Ò¸ğ¸¦ ´Ã¸®·Á°í Ãß°¡ÇÑ ÄÚµå
         for( j = 0 ; j < 30000 ; j++ ) ;
     }
 
-    // ëª¨ë“  íƒœìŠ¤í¬ê°€ ì¢…ë£Œí•  ë•Œê¹Œì§€ 1ì´ˆ(100ms) ì •ë„ ëŒ€ê¸°
+    // ¸ğµç ÅÂ½ºÅ©°¡ Á¾·áÇÒ ¶§±îÁö 1ÃÊ(100ms) Á¤µµ ´ë±â
     qwTickCount = kGetTickCount();
     while( ( kGetTickCount() - qwTickCount ) < 1000 )
     {
         kSchedule();
     }
 
-    // íƒœìŠ¤í¬ ì¢…ë£Œ
+    // ÅÂ½ºÅ© Á¾·á
     kExitTask();
 }
 
 /**
- *  ë®¤í…ìŠ¤ë¥¼ í…ŒìŠ¤íŠ¸í•˜ëŠ” íƒœìŠ¤í¬ ìƒì„±
+ *  ¹ÂÅØ½º¸¦ Å×½ºÆ®ÇÏ´Â ÅÂ½ºÅ© »ı¼º
  */
 static void kTestMutex( const char* pcParameterBuffer )
 {
@@ -982,12 +988,12 @@ static void kTestMutex( const char* pcParameterBuffer )
 
     gs_qwAdder = 1;
 
-    // ë®¤í…ìŠ¤ ì´ˆê¸°í™”
+    // ¹ÂÅØ½º ÃÊ±âÈ­
     kInitializeMutex( &gs_stMutex );
 
     for( i = 0 ; i < 3 ; i++ )
     {
-        // ë®¤í…ìŠ¤ë¥¼ í…ŒìŠ¤íŠ¸í•˜ëŠ” íƒœìŠ¤í¬ë¥¼ 3ê°œ ìƒì„±
+        // ¹ÂÅØ½º¸¦ Å×½ºÆ®ÇÏ´Â ÅÂ½ºÅ©¸¦ 3°³ »ı¼º
         kCreateTask( TASK_FLAGS_LOW | TASK_FLAGS_THREAD, 0, 0, ( QWORD ) kPrintNumberTask );
     }
     kPrintf( "Wait Util %d Task End...\n", i );
@@ -995,7 +1001,7 @@ static void kTestMutex( const char* pcParameterBuffer )
 }
 
 /**
- *  íƒœìŠ¤í¬ 2ë¥¼ ìì‹ ì˜ ìŠ¤ë ˆë“œë¡œ ìƒì„±í•˜ëŠ” íƒœìŠ¤í¬
+ *  ÅÂ½ºÅ© 2¸¦ ÀÚ½ÅÀÇ ½º·¹µå·Î »ı¼ºÇÏ´Â ÅÂ½ºÅ©
  */
 static void kCreateThreadTask( void )
 {
@@ -1013,7 +1019,7 @@ static void kCreateThreadTask( void )
 }
 
 /**
- *  ìŠ¤ë ˆë“œë¥¼ í…ŒìŠ¤íŠ¸í•˜ëŠ” íƒœìŠ¤í¬ ìƒì„±
+ *  ½º·¹µå¸¦ Å×½ºÆ®ÇÏ´Â ÅÂ½ºÅ© »ı¼º
  */
 static void kTestThread( const char* pcParameterBuffer )
 {
@@ -1031,11 +1037,11 @@ static void kTestThread( const char* pcParameterBuffer )
     }
 }
 
-// ë‚œìˆ˜ë¥¼ ë°œìƒì‹œí‚¤ê¸° ìœ„í•œ ë³€ìˆ˜
+// ³­¼ö¸¦ ¹ß»ı½ÃÅ°±â À§ÇÑ º¯¼ö
 static volatile QWORD gs_qwRandomValue = 0;
 
 /**
- *  ì„ì˜ì˜ ë‚œìˆ˜ë¥¼ ë°˜í™˜
+ *  ÀÓÀÇÀÇ ³­¼ö¸¦ ¹İÈ¯
  */
 QWORD kRandom( void )
 {
@@ -1065,7 +1071,7 @@ static void kRand(){
 }
 
 /**
- *  ì² ìë¥¼ í˜ëŸ¬ë‚´ë¦¬ê²Œ í•˜ëŠ” ìŠ¤ë ˆë“œ
+ *  Ã¶ÀÚ¸¦ Èê·¯³»¸®°Ô ÇÏ´Â ½º·¹µå
  */
 static void kDropCharactorThread( void )
 {
@@ -1077,7 +1083,7 @@ static void kDropCharactorThread( void )
 
     while( 1 )
     {
-        // ì ì‹œ ëŒ€ê¸°í•¨
+        // Àá½Ã ´ë±âÇÔ
         kSleep( kRandom() % 20 );
 
         if( ( kRandom() % 20 ) < 16 )
@@ -1102,7 +1108,7 @@ static void kDropCharactorThread( void )
 }
 
 /**
- *  ìŠ¤ë ˆë“œë¥¼ ìƒì„±í•˜ì—¬ ë§¤íŠ¸ë¦­ìŠ¤ í™”ë©´ì²˜ëŸ¼ ë³´ì—¬ì£¼ëŠ” í”„ë¡œì„¸ìŠ¤
+ *  ½º·¹µå¸¦ »ı¼ºÇÏ¿© ¸ÅÆ®¸¯½º È­¸éÃ³·³ º¸¿©ÁÖ´Â ÇÁ·Î¼¼½º
  */
 static void kMatrixProcess( void )
 {
@@ -1121,12 +1127,12 @@ static void kMatrixProcess( void )
 
     kPrintf( "%d Thread is created\n", i );
 
-    // í‚¤ê°€ ì…ë ¥ë˜ë©´ í”„ë¡œì„¸ìŠ¤ ì¢…ë£Œ
+    // Å°°¡ ÀÔ·ÂµÇ¸é ÇÁ·Î¼¼½º Á¾·á
     kGetCh();
 }
 
 /**
- *  ë§¤íŠ¸ë¦­ìŠ¤ í™”ë©´ì„ ë³´ì—¬ì¤Œ
+ *  ¸ÅÆ®¸¯½º È­¸éÀ» º¸¿©ÁÜ
  */
 static void kShowMatrix( const char* pcParameterBuffer )
 {
@@ -1138,7 +1144,7 @@ static void kShowMatrix( const char* pcParameterBuffer )
     {
         kPrintf( "Matrix Process [0x%Q] Create Success\n" );
 
-        // íƒœìŠ¤í¬ê°€ ì¢…ë£Œ ë  ë•Œê¹Œì§€ ëŒ€ê¸°
+        // ÅÂ½ºÅ©°¡ Á¾·á µÉ ¶§±îÁö ´ë±â
         while( ( pstProcess->stLink.qwID >> 32 ) != 0 )
         {
             kSleep( 100 );
@@ -1151,7 +1157,7 @@ static void kShowMatrix( const char* pcParameterBuffer )
 }
 
 /**
- *  FPUë¥¼ í…ŒìŠ¤íŠ¸í•˜ëŠ” íƒœìŠ¤í¬
+ *  FPU¸¦ Å×½ºÆ®ÇÏ´Â ÅÂ½ºÅ©
  */
 static void kFPUTestTask( void )
 {
@@ -1167,18 +1173,18 @@ static void kFPUTestTask( void )
 
     pstRunningTask = kGetRunningTask();
 
-    // ìì‹ ì˜ IDë¥¼ ì–»ì–´ì„œ í™”ë©´ ì˜¤í”„ì…‹ìœ¼ë¡œ ì‚¬ìš©
+    // ÀÚ½ÅÀÇ ID¸¦ ¾ò¾î¼­ È­¸é ¿ÀÇÁ¼ÂÀ¸·Î »ç¿ë
     iOffset = ( pstRunningTask->stLink.qwID & 0xFFFFFFFF ) * 2;
     iOffset = CONSOLE_WIDTH * CONSOLE_HEIGHT -
         ( iOffset % ( CONSOLE_WIDTH * CONSOLE_HEIGHT ) );
 
-    // ë£¨í”„ë¥¼ ë¬´í•œíˆ ë°˜ë³µí•˜ë©´ì„œ ë™ì¼í•œ ê³„ì‚°ì„ ìˆ˜í–‰
+    // ·çÇÁ¸¦ ¹«ÇÑÈ÷ ¹İº¹ÇÏ¸é¼­ µ¿ÀÏÇÑ °è»êÀ» ¼öÇà
     while( 1 )
     {
         dValue1 = 1;
         dValue2 = 1;
 
-        // í…ŒìŠ¤íŠ¸ë¥¼ ìœ„í•´ ë™ì¼í•œ ê³„ì‚°ì„ 2ë²ˆ ë°˜ë³µí•´ì„œ ì‹¤í–‰
+        // Å×½ºÆ®¸¦ À§ÇØ µ¿ÀÏÇÑ °è»êÀ» 2¹ø ¹İº¹ÇØ¼­ ½ÇÇà
         for( i = 0 ; i < 10 ; i++ )
         {
             qwRandomValue = kRandom();
@@ -1199,16 +1205,16 @@ static void kFPUTestTask( void )
         }
         qwCount++;
 
-        // íšŒì „í•˜ëŠ” ë°”ëŒê°œë¹„ë¥¼ í‘œì‹œ
+        // È¸ÀüÇÏ´Â ¹Ù¶÷°³ºñ¸¦ Ç¥½Ã
         pstScreen[ iOffset ].bCharactor = vcData[ qwCount % 4 ];
 
-        // ìƒ‰ê¹” ì§€ì •
+        // »ö±ò ÁöÁ¤
         pstScreen[ iOffset ].bAttribute = ( iOffset % 15 ) + 1;
     }
 }
 
 /**
- *  ì›ì£¼ìœ¨(PIE)ë¥¼ ê³„ì‚°
+ *  ¿øÁÖÀ²(PIE)¸¦ °è»ê
  */
 static void kTestPIE( const char* pcParameterBuffer )
 {
@@ -1221,7 +1227,7 @@ static void kTestPIE( const char* pcParameterBuffer )
     kPrintf( "%d.%d%d\n", ( QWORD ) dResult, ( ( QWORD ) ( dResult * 10 ) % 10 ),
              ( ( QWORD ) ( dResult * 100 ) % 10 ) );
 
-    // ì‹¤ìˆ˜ë¥¼ ê³„ì‚°í•˜ëŠ” íƒœìŠ¤í¬ë¥¼ ìƒì„±
+    // ½Ç¼ö¸¦ °è»êÇÏ´Â ÅÂ½ºÅ©¸¦ »ı¼º
     for( i = 0 ; i < 100 ; i++ )
     {
         kCreateTask( TASK_FLAGS_LOW | TASK_FLAGS_THREAD, 0, 0, ( QWORD ) kFPUTestTask );
@@ -1229,7 +1235,7 @@ static void kTestPIE( const char* pcParameterBuffer )
 }
 
 /**
- *  ë™ì  ë©”ëª¨ë¦¬ ì •ë³´ë¥¼ í‘œì‹œ
+ *  µ¿Àû ¸Ş¸ğ¸® Á¤º¸¸¦ Ç¥½Ã
  */
 static void kShowDyanmicMemoryInformation( const char* pcParameterBuffer )
 {
@@ -1248,7 +1254,7 @@ static void kShowDyanmicMemoryInformation( const char* pcParameterBuffer )
 }
 
 /**
- *  ëª¨ë“  ë¸”ë¡ ë¦¬ìŠ¤íŠ¸ì˜ ë¸”ë¡ì„ ìˆœì°¨ì ìœ¼ë¡œ í• ë‹¹í•˜ê³  í•´ì œí•˜ëŠ” í…ŒìŠ¤íŠ¸
+ *  ¸ğµç ºí·Ï ¸®½ºÆ®ÀÇ ºí·ÏÀ» ¼øÂ÷ÀûÀ¸·Î ÇÒ´çÇÏ°í ÇØÁ¦ÇÏ´Â Å×½ºÆ®
  */
 static void kTestSequentialAllocation( const char* pcParameterBuffer )
 {
@@ -1264,7 +1270,7 @@ static void kTestSequentialAllocation( const char* pcParameterBuffer )
         kPrintf( "Block List [%d] Test Start\n", i );
         kPrintf( "Allocation And Compare: ");
 
-        // ëª¨ë“  ë¸”ë¡ì„ í• ë‹¹ ë°›ì•„ì„œ ê°’ì„ ì±„ìš´ í›„ ê²€ì‚¬
+        // ¸ğµç ºí·ÏÀ» ÇÒ´ç ¹Ş¾Æ¼­ °ªÀ» Ã¤¿î ÈÄ °Ë»ç
         for( j = 0 ; j < ( pstMemory->iBlockCountOfSmallestBlock >> i ) ; j++ )
         {
             pqwBuffer = kAllocateMemory( DYNAMICMEMORY_MIN_SIZE << i );
@@ -1274,7 +1280,7 @@ static void kTestSequentialAllocation( const char* pcParameterBuffer )
                 return ;
             }
 
-            // ê°’ì„ ì±„ìš´ í›„ ë‹¤ì‹œ ê²€ì‚¬
+            // °ªÀ» Ã¤¿î ÈÄ ´Ù½Ã °Ë»ç
             for( k = 0 ; k < ( DYNAMICMEMORY_MIN_SIZE << i ) / 8 ; k++ )
             {
                 pqwBuffer[ k ] = k;
@@ -1288,12 +1294,12 @@ static void kTestSequentialAllocation( const char* pcParameterBuffer )
                     return ;
                 }
             }
-            // ì§„í–‰ ê³¼ì •ì„ . ìœ¼ë¡œ í‘œì‹œ
+            // ÁøÇà °úÁ¤À» . À¸·Î Ç¥½Ã
             kPrintf( "." );
         }
 
         kPrintf( "\nFree: ");
-        // í• ë‹¹ ë°›ì€ ë¸”ë¡ì„ ëª¨ë‘ ë°˜í™˜
+        // ÇÒ´ç ¹ŞÀº ºí·ÏÀ» ¸ğµÎ ¹İÈ¯
         for( j = 0 ; j < ( pstMemory->iBlockCountOfSmallestBlock >> i ) ; j++ )
         {
             if( kFreeMemory( ( void * ) ( pstMemory->qwStartAddress +
@@ -1302,7 +1308,7 @@ static void kTestSequentialAllocation( const char* pcParameterBuffer )
                 kPrintf( "\nFree Fail\n" );
                 return ;
             }
-            // ì§„í–‰ ê³¼ì •ì„ . ìœ¼ë¡œ í‘œì‹œ
+            // ÁøÇà °úÁ¤À» . À¸·Î Ç¥½Ã
             kPrintf( "." );
         }
         kPrintf( "\n" );
@@ -1311,7 +1317,7 @@ static void kTestSequentialAllocation( const char* pcParameterBuffer )
 }
 
 /**
- *  ì„ì˜ë¡œ ë©”ëª¨ë¦¬ë¥¼ í• ë‹¹í•˜ê³  í•´ì œí•˜ëŠ” ê²ƒì„ ë°˜ë³µí•˜ëŠ” íƒœìŠ¤í¬
+ *  ÀÓÀÇ·Î ¸Ş¸ğ¸®¸¦ ÇÒ´çÇÏ°í ÇØÁ¦ÇÏ´Â °ÍÀ» ¹İº¹ÇÏ´Â ÅÂ½ºÅ©
  */
 static void kRandomAllocationTask( void )
 {
@@ -1327,14 +1333,14 @@ static void kRandomAllocationTask( void )
 
     for( j = 0 ; j < 10 ; j++ )
     {
-        // 1KB ~ 32Mê¹Œì§€ í• ë‹¹í•˜ë„ë¡ í•¨
+        // 1KB ~ 32M±îÁö ÇÒ´çÇÏµµ·Ï ÇÔ
         do
         {
             qwMemorySize = ( ( kRandom() % ( 32 * 1024 ) ) + 1 ) * 1024;
             pbAllocationBuffer = kAllocateMemory( qwMemorySize );
 
-            // ë§Œì¼ ë²„í¼ë¥¼ í• ë‹¹ ë°›ì§€ ëª»í•˜ë©´ ë‹¤ë¥¸ íƒœìŠ¤í¬ê°€ ë©”ëª¨ë¦¬ë¥¼ ì‚¬ìš©í•˜ê³ 
-            // ìˆì„ ìˆ˜ ìˆìœ¼ë¯€ë¡œ ì ì‹œ ëŒ€ê¸°í•œ í›„ ë‹¤ì‹œ ì‹œë„
+            // ¸¸ÀÏ ¹öÆÛ¸¦ ÇÒ´ç ¹ŞÁö ¸øÇÏ¸é ´Ù¸¥ ÅÂ½ºÅ©°¡ ¸Ş¸ğ¸®¸¦ »ç¿ëÇÏ°í
+            // ÀÖÀ» ¼ö ÀÖÀ¸¹Ç·Î Àá½Ã ´ë±âÇÑ ÈÄ ´Ù½Ã ½Ãµµ
             if( pbAllocationBuffer == 0 )
             {
                 kSleep( 1 );
@@ -1343,11 +1349,11 @@ static void kRandomAllocationTask( void )
 
         kSPrintf( vcBuffer, "|Address: [0x%Q] Size: [0x%Q] Allocation Success",
                   pbAllocationBuffer, qwMemorySize );
-        // ìì‹ ì˜ IDë¥¼ Y ì¢Œí‘œë¡œ í•˜ì—¬ ë°ì´í„°ë¥¼ ì¶œë ¥
+        // ÀÚ½ÅÀÇ ID¸¦ Y ÁÂÇ¥·Î ÇÏ¿© µ¥ÀÌÅÍ¸¦ Ãâ·Â
         kPrintStringXY( 20, iY, vcBuffer );
         kSleep( 200 );
 
-        // ë²„í¼ë¥¼ ë°˜ìœ¼ë¡œ ë‚˜ëˆ ì„œ ëœë¤í•œ ë°ì´í„°ë¥¼ ë˜‘ê°™ì´ ì±„ì›€
+        // ¹öÆÛ¸¦ ¹İÀ¸·Î ³ª´²¼­ ·£´ıÇÑ µ¥ÀÌÅÍ¸¦ ¶È°°ÀÌ Ã¤¿ò
         kSPrintf( vcBuffer, "|Address: [0x%Q] Size: [0x%Q] Data Write...     ",
                   pbAllocationBuffer, qwMemorySize );
         kPrintStringXY( 20, iY, vcBuffer );
@@ -1358,7 +1364,7 @@ static void kRandomAllocationTask( void )
         }
         kSleep( 200 );
 
-        // ì±„ìš´ ë°ì´í„°ê°€ ì •ìƒì ì¸ì§€ ë‹¤ì‹œ í™•ì¸
+        // Ã¤¿î µ¥ÀÌÅÍ°¡ Á¤»óÀûÀÎÁö ´Ù½Ã È®ÀÎ
         kSPrintf( vcBuffer, "|Address: [0x%Q] Size: [0x%Q] Data Verify...   ",
                   pbAllocationBuffer, qwMemorySize );
         kPrintStringXY( 20, iY, vcBuffer );
@@ -1378,7 +1384,7 @@ static void kRandomAllocationTask( void )
 }
 
 /**
- *  íƒœìŠ¤í¬ë¥¼ ì—¬ëŸ¬ ê°œ ìƒì„±í•˜ì—¬ ì„ì˜ì˜ ë©”ëª¨ë¦¬ë¥¼ í• ë‹¹í•˜ê³  í•´ì œí•˜ëŠ” ê²ƒì„ ë°˜ë³µí•˜ëŠ” í…ŒìŠ¤íŠ¸
+ *  ÅÂ½ºÅ©¸¦ ¿©·¯ °³ »ı¼ºÇÏ¿© ÀÓÀÇÀÇ ¸Ş¸ğ¸®¸¦ ÇÒ´çÇÏ°í ÇØÁ¦ÇÏ´Â °ÍÀ» ¹İº¹ÇÏ´Â Å×½ºÆ®
  */
 static void kTestRandomAllocation( const char* pcParameterBuffer )
 {
@@ -1391,14 +1397,14 @@ static void kTestRandomAllocation( const char* pcParameterBuffer )
 }
 
 /**
- *  í•˜ë“œ ë””ìŠ¤í¬ì˜ ì •ë³´ë¥¼ í‘œì‹œ
+ *  ÇÏµå µğ½ºÅ©ÀÇ Á¤º¸¸¦ Ç¥½Ã
  */
 static void kShowHDDInformation( const char* pcParameterBuffer )
 {
     HDDINFORMATION stHDD;
     char vcBuffer[ 100 ];
 
-    // í•˜ë“œ ë””ìŠ¤í¬ì˜ ì •ë³´ë¥¼ ì½ìŒ
+    // ÇÏµå µğ½ºÅ©ÀÇ Á¤º¸¸¦ ÀĞÀ½
     if( kGetHDDInformation( &stHDD ) == FALSE )
     {
         kPrintf( "HDD Information Read Fail\n" );
@@ -1407,28 +1413,28 @@ static void kShowHDDInformation( const char* pcParameterBuffer )
 
     kPrintf( "============ Primary Master HDD Information ============\n" );
 
-    // ëª¨ë¸ ë²ˆí˜¸ ì¶œë ¥
+    // ¸ğµ¨ ¹øÈ£ Ãâ·Â
     kMemCpy( vcBuffer, stHDD.vwModelNumber, sizeof( stHDD.vwModelNumber ) );
     vcBuffer[ sizeof( stHDD.vwModelNumber ) - 1 ] = '\0';
     kPrintf( "Model Number:\t %s\n", vcBuffer );
 
-    // ì‹œë¦¬ì–¼ ë²ˆí˜¸ ì¶œë ¥
+    // ½Ã¸®¾ó ¹øÈ£ Ãâ·Â
     kMemCpy( vcBuffer, stHDD.vwSerialNumber, sizeof( stHDD.vwSerialNumber ) );
     vcBuffer[ sizeof( stHDD.vwSerialNumber ) - 1 ] = '\0';
     kPrintf( "Serial Number:\t %s\n", vcBuffer );
 
-    // í—¤ë“œ, ì‹¤ë¦°ë”, ì‹¤ë¦°ë” ë‹¹ ì„¹í„° ìˆ˜ë¥¼ ì¶œë ¥
+    // Çìµå, ½Ç¸°´õ, ½Ç¸°´õ ´ç ¼½ÅÍ ¼ö¸¦ Ãâ·Â
     kPrintf( "Head Count:\t %d\n", stHDD.wNumberOfHead );
     kPrintf( "Cylinder Count:\t %d\n", stHDD.wNumberOfCylinder );
     kPrintf( "Sector Count:\t %d\n", stHDD.wNumberOfSectorPerCylinder );
 
-    // ì´ ì„¹í„° ìˆ˜ ì¶œë ¥
+    // ÃÑ ¼½ÅÍ ¼ö Ãâ·Â
     kPrintf( "Total Sector:\t %d Sector, %dMB\n", stHDD.dwTotalSectors,
             stHDD.dwTotalSectors / 2 / 1024 );
 }
 
 /**
- *  í•˜ë“œ ë””ìŠ¤í¬ì— íŒŒë¼ë¯¸í„°ë¡œ ë„˜ì–´ì˜¨ LBA ì–´ë“œë ˆìŠ¤ì—ì„œ ì„¹í„° ìˆ˜ ë§Œí¼ ì½ìŒ
+ *  ÇÏµå µğ½ºÅ©¿¡ ÆÄ¶ó¹ÌÅÍ·Î ³Ñ¾î¿Â LBA ¾îµå·¹½º¿¡¼­ ¼½ÅÍ ¼ö ¸¸Å­ ÀĞÀ½
  */
 static void kReadSector( const char* pcParameterBuffer )
 {
@@ -1441,7 +1447,7 @@ static void kReadSector( const char* pcParameterBuffer )
     BYTE bData;
     BOOL bExit = FALSE;
 
-    // íŒŒë¼ë¯¸í„° ë¦¬ìŠ¤íŠ¸ë¥¼ ì´ˆê¸°í™”í•˜ì—¬ LBA ì–´ë“œë ˆìŠ¤ì™€ ì„¹í„° ìˆ˜ ì¶”ì¶œ
+    // ÆÄ¶ó¹ÌÅÍ ¸®½ºÆ®¸¦ ÃÊ±âÈ­ÇÏ¿© LBA ¾îµå·¹½º¿Í ¼½ÅÍ ¼ö ÃßÃâ
     kInitializeParameter( &stList, pcParameterBuffer );
     if( ( kGetNextParameter( &stList, vcLBA ) == 0 ) ||
         ( kGetNextParameter( &stList, vcSectorCount ) == 0 ) )
@@ -1452,12 +1458,12 @@ static void kReadSector( const char* pcParameterBuffer )
     dwLBA = kAToI( vcLBA, 10 );
     iSectorCount = kAToI( vcSectorCount, 10 );
 
-    // ì„¹í„° ìˆ˜ë§Œí¼ ë©”ëª¨ë¦¬ë¥¼ í• ë‹¹ ë°›ì•„ ì½ê¸° ìˆ˜í–‰
+    // ¼½ÅÍ ¼ö¸¸Å­ ¸Ş¸ğ¸®¸¦ ÇÒ´ç ¹Ş¾Æ ÀĞ±â ¼öÇà
     pcBuffer = kAllocateMemory( iSectorCount * 512 );
     if( kReadHDDSector( TRUE, TRUE, dwLBA, iSectorCount, pcBuffer ) == iSectorCount )
     {
         kPrintf( "LBA [%d], [%d] Sector Read Success~!!", dwLBA, iSectorCount );
-        // ë°ì´í„° ë²„í¼ì˜ ë‚´ìš©ì„ ì¶œë ¥
+        // µ¥ÀÌÅÍ ¹öÆÛÀÇ ³»¿ëÀ» Ãâ·Â
         for( j = 0 ; j < iSectorCount ; j++ )
         {
             for( i = 0 ; i < 512 ; i++ )
@@ -1477,7 +1483,7 @@ static void kReadSector( const char* pcParameterBuffer )
                     kPrintf( "\n[LBA:%d, Offset:%d]\t| ", dwLBA + j, i );
                 }
 
-                // ëª¨ë‘ ë‘ ìë¦¬ë¡œ í‘œì‹œí•˜ë ¤ê³  16ë³´ë‹¤ ì‘ì€ ê²½ìš° 0ì„ ì¶”ê°€í•´ì¤Œ
+                // ¸ğµÎ µÎ ÀÚ¸®·Î Ç¥½ÃÇÏ·Á°í 16º¸´Ù ÀÛÀº °æ¿ì 0À» Ãß°¡ÇØÁÜ
                 bData = pcBuffer[ j * 512 + i ] & 0xFF;
                 if( bData < 16 )
                 {
@@ -1502,7 +1508,7 @@ static void kReadSector( const char* pcParameterBuffer )
 }
 
 /**
- *  í•˜ë“œ ë””ìŠ¤í¬ì— íŒŒë¼ë¯¸í„°ë¡œ ë„˜ì–´ì˜¨ LBA ì–´ë“œë ˆìŠ¤ì—ì„œ ì„¹í„° ìˆ˜ ë§Œí¼ ì”€
+ *  ÇÏµå µğ½ºÅ©¿¡ ÆÄ¶ó¹ÌÅÍ·Î ³Ñ¾î¿Â LBA ¾îµå·¹½º¿¡¼­ ¼½ÅÍ ¼ö ¸¸Å­ ¾¸
  */
 static void kWriteSector( const char* pcParameterBuffer )
 {
@@ -1516,7 +1522,7 @@ static void kWriteSector( const char* pcParameterBuffer )
     BYTE bData;
     static DWORD s_dwWriteCount = 0;
 
-    // íŒŒë¼ë¯¸í„° ë¦¬ìŠ¤íŠ¸ë¥¼ ì´ˆê¸°í™”í•˜ì—¬ LBA ì–´ë“œë ˆìŠ¤ì™€ ì„¹í„° ìˆ˜ ì¶”ì¶œ
+    // ÆÄ¶ó¹ÌÅÍ ¸®½ºÆ®¸¦ ÃÊ±âÈ­ÇÏ¿© LBA ¾îµå·¹½º¿Í ¼½ÅÍ ¼ö ÃßÃâ
     kInitializeParameter( &stList, pcParameterBuffer );
     if( ( kGetNextParameter( &stList, vcLBA ) == 0 ) ||
         ( kGetNextParameter( &stList, vcSectorCount ) == 0 ) )
@@ -1529,8 +1535,8 @@ static void kWriteSector( const char* pcParameterBuffer )
 
     s_dwWriteCount++;
 
-    // ë²„í¼ë¥¼ í• ë‹¹ ë°›ì•„ ë°ì´í„°ë¥¼ ì±„ì›€.
-    // íŒ¨í„´ì€ 4 ë°”ì´íŠ¸ì˜ LBA ì–´ë“œë ˆìŠ¤ì™€ 4 ë°”ì´íŠ¸ì˜ ì“°ê¸°ê°€ ìˆ˜í–‰ëœ íšŸìˆ˜ë¡œ ìƒì„±
+    // ¹öÆÛ¸¦ ÇÒ´ç ¹Ş¾Æ µ¥ÀÌÅÍ¸¦ Ã¤¿ò.
+    // ÆĞÅÏÀº 4 ¹ÙÀÌÆ®ÀÇ LBA ¾îµå·¹½º¿Í 4 ¹ÙÀÌÆ®ÀÇ ¾²±â°¡ ¼öÇàµÈ È½¼ö·Î »ı¼º
     pcBuffer = kAllocateMemory( iSectorCount * 512 );
     for( j = 0 ; j < iSectorCount ; j++ )
     {
@@ -1541,7 +1547,7 @@ static void kWriteSector( const char* pcParameterBuffer )
         }
     }
 
-    // ì“°ê¸° ìˆ˜í–‰
+    // ¾²±â ¼öÇà
     if( kWriteHDDSector( TRUE, TRUE, dwLBA, iSectorCount, pcBuffer ) != iSectorCount )
     {
         kPrintf( "Write Fail\n" );
@@ -1549,7 +1555,7 @@ static void kWriteSector( const char* pcParameterBuffer )
     }
     kPrintf( "LBA [%d], [%d] Sector Write Success~!!", dwLBA, iSectorCount );
 
-    // ë°ì´í„° ë²„í¼ì˜ ë‚´ìš©ì„ ì¶œë ¥
+    // µ¥ÀÌÅÍ ¹öÆÛÀÇ ³»¿ëÀ» Ãâ·Â
     for( j = 0 ; j < iSectorCount ; j++ )
     {
         for( i = 0 ; i < 512 ; i++ )
@@ -1569,7 +1575,7 @@ static void kWriteSector( const char* pcParameterBuffer )
                 kPrintf( "\n[LBA:%d, Offset:%d]\t| ", dwLBA + j, i );
             }
 
-            // ëª¨ë‘ ë‘ ìë¦¬ë¡œ í‘œì‹œí•˜ë ¤ê³  16ë³´ë‹¤ ì‘ì€ ê²½ìš° 0ì„ ì¶”ê°€í•´ì¤Œ
+            // ¸ğµÎ µÎ ÀÚ¸®·Î Ç¥½ÃÇÏ·Á°í 16º¸´Ù ÀÛÀº °æ¿ì 0À» Ãß°¡ÇØÁÜ
             bData = pcBuffer[ j * 512 + i ] & 0xFF;
             if( bData < 16 )
             {
@@ -1588,7 +1594,7 @@ static void kWriteSector( const char* pcParameterBuffer )
 }
 
 /**
- *  í•˜ë“œ ë””ìŠ¤í¬ë¥¼ ì—°ê²°
+ *  ÇÏµå µğ½ºÅ©¸¦ ¿¬°á
  */
 static void kMountHDD( const char* pcParameterBuffer )
 {
@@ -1601,7 +1607,7 @@ static void kMountHDD( const char* pcParameterBuffer )
 }
 
 /**
- *  í•˜ë“œ ë””ìŠ¤í¬ì— íŒŒì¼ ì‹œìŠ¤í…œì„ ìƒì„±(í¬ë§·)
+ *  ÇÏµå µğ½ºÅ©¿¡ ÆÄÀÏ ½Ã½ºÅÛÀ» »ı¼º(Æ÷¸Ë)
  */
 static void kFormatHDD( const char* pcParameterBuffer )
 {
@@ -1614,7 +1620,7 @@ static void kFormatHDD( const char* pcParameterBuffer )
 }
 
 /**
- *  íŒŒì¼ ì‹œìŠ¤í…œ ì •ë³´ë¥¼ í‘œì‹œ
+ *  ÆÄÀÏ ½Ã½ºÅÛ Á¤º¸¸¦ Ç¥½Ã
  */
 static void kShowFileSystemInformation( const char* pcParameterBuffer )
 {
@@ -1633,7 +1639,7 @@ static void kShowFileSystemInformation( const char* pcParameterBuffer )
 }
 
 /**
- *  ë£¨íŠ¸ ë””ë ‰í„°ë¦¬ì— ë¹ˆ íŒŒì¼ì„ ìƒì„±
+ *  ·çÆ® µğ·ºÅÍ¸®¿¡ ºó ÆÄÀÏÀ» »ı¼º
  */
 static void kCreateFileInRootDirectory( const char* pcParameterBuffer )
 {
@@ -1644,7 +1650,7 @@ static void kCreateFileInRootDirectory( const char* pcParameterBuffer )
     int i;
     FILE* pstFile;
 
-    // íŒŒë¼ë¯¸í„° ë¦¬ìŠ¤íŠ¸ë¥¼ ì´ˆê¸°í™”í•˜ì—¬ íŒŒì¼ ì´ë¦„ì„ ì¶”ì¶œ
+    // ÆÄ¶ó¹ÌÅÍ ¸®½ºÆ®¸¦ ÃÊ±âÈ­ÇÏ¿© ÆÄÀÏ ÀÌ¸§À» ÃßÃâ
     kInitializeParameter( &stList, pcParameterBuffer );
     iLength = kGetNextParameter( &stList, vcFileName );
     vcFileName[ iLength ] = '\0';
@@ -1665,7 +1671,7 @@ static void kCreateFileInRootDirectory( const char* pcParameterBuffer )
 }
 
 /**
- *  ë£¨íŠ¸ ë””ë ‰í„°ë¦¬ì—ì„œ íŒŒì¼ì„ ì‚­ì œ
+ *  ·çÆ® µğ·ºÅÍ¸®¿¡¼­ ÆÄÀÏÀ» »èÁ¦
  */
 static void kDeleteFileInRootDirectory( const char* pcParameterBuffer )
 {
@@ -1673,7 +1679,7 @@ static void kDeleteFileInRootDirectory( const char* pcParameterBuffer )
     char vcFileName[ 50 ];
     int iLength;
 
-    // íŒŒë¼ë¯¸í„° ë¦¬ìŠ¤íŠ¸ë¥¼ ì´ˆê¸°í™”í•˜ì—¬ íŒŒì¼ ì´ë¦„ì„ ì¶”ì¶œ
+    // ÆÄ¶ó¹ÌÅÍ ¸®½ºÆ®¸¦ ÃÊ±âÈ­ÇÏ¿© ÆÄÀÏ ÀÌ¸§À» ÃßÃâ
     kInitializeParameter( &stList, pcParameterBuffer );
     iLength = kGetNextParameter( &stList, vcFileName );
     vcFileName[ iLength ] = '\0';
@@ -1693,7 +1699,7 @@ static void kDeleteFileInRootDirectory( const char* pcParameterBuffer )
 }
 
 /**
- *  ë£¨íŠ¸ ë””ë ‰í„°ë¦¬ì˜ íŒŒì¼ ëª©ë¡ì„ í‘œì‹œ
+ *  ·çÆ® µğ·ºÅÍ¸®ÀÇ ÆÄÀÏ ¸ñ·ÏÀ» Ç¥½Ã
  */
 static void kShowRootDirectory( const char* pcParameterBuffer )
 {
@@ -1705,107 +1711,148 @@ static void kShowRootDirectory( const char* pcParameterBuffer )
     DWORD dwTotalByte;
     DWORD dwUsedClusterCount;
     FILESYSTEMMANAGER stManager;
+    DIRECTORYENTRY* info;
 
-    // íŒŒì¼ ì‹œìŠ¤í…œ ì •ë³´ë¥¼ ì–»ìŒ
+    // ÆÄÀÏ ½Ã½ºÅÛ Á¤º¸¸¦ ¾òÀ½
     kGetFileSystemInformation( &stManager );
-
-    // ë£¨íŠ¸ ë””ë ‰í„°ë¦¬ë¥¼ ì—¶
-    pstDirectory = opendir( "/" );
-    if( pstDirectory == NULL )
+    //+
+    info = kFindDirectory(curDirectoryClusterIdx);
+    if(info==NULL) return ;
+    for( i = 0 ; i < FILESYSTEM_MAXDIRECTORYENTRYCOUNT ; i++ )
     {
-        kPrintf( "Root Directory Open Fail\n" );
-        return ;
-    }
-
-    // ë¨¼ì € ë£¨í”„ë¥¼ ëŒë©´ì„œ ë””ë ‰í„°ë¦¬ì— ìˆëŠ” íŒŒì¼ì˜ ê°œìˆ˜ì™€ ì „ì²´ íŒŒì¼ì´ ì‚¬ìš©í•œ í¬ê¸°ë¥¼ ê³„ì‚°
-    iTotalCount = 0;
-    dwTotalByte = 0;
-    dwUsedClusterCount = 0;
-    while( 1 )
-    {
-        // ë””ë ‰í„°ë¦¬ì—ì„œ ì—”íŠ¸ë¦¬ í•˜ë‚˜ë¥¼ ì½ìŒ
-        pstEntry = readdir( pstDirectory );
-        // ë”ì´ìƒ íŒŒì¼ì´ ì—†ìœ¼ë©´ ë‚˜ê°
-        if( pstEntry == NULL )
+        if( info[ i ].dwStartClusterIndex != 0 )
         {
-            break;
-        }
-        iTotalCount++;
-        dwTotalByte += pstEntry->dwFileSize;
-
-        // ì‹¤ì œë¡œ ì‚¬ìš©ëœ í´ëŸ¬ìŠ¤í„°ì˜ ê°œìˆ˜ë¥¼ ê³„ì‚°
-        if( pstEntry->dwFileSize == 0 )
-        {
-            // í¬ê¸°ê°€ 0ì´ë¼ë„ í´ëŸ¬ìŠ¤í„° 1ê°œëŠ” í• ë‹¹ë˜ì–´ ìˆìŒ
-            dwUsedClusterCount++;
-        }
-        else
-        {
-            // í´ëŸ¬ìŠ¤í„° ê°œìˆ˜ë¥¼ ì˜¬ë¦¼í•˜ì—¬ ë”í•¨
-            dwUsedClusterCount += ( pstEntry->dwFileSize +
-                ( FILESYSTEM_CLUSTERSIZE - 1 ) ) / FILESYSTEM_CLUSTERSIZE;
-        }
-    }
-
-    // ì‹¤ì œ íŒŒì¼ì˜ ë‚´ìš©ì„ í‘œì‹œí•˜ëŠ” ë£¨í”„
-    rewinddir( pstDirectory );
-    iCount = 0;
-    while( 1 )
-    {
-        // ë””ë ‰í„°ë¦¬ì—ì„œ ì—”íŠ¸ë¦¬ í•˜ë‚˜ë¥¼ ì½ìŒ
-        pstEntry = readdir( pstDirectory );
-        // ë”ì´ìƒ íŒŒì¼ì´ ì—†ìœ¼ë©´ ë‚˜ê°
-        if( pstEntry == NULL )
-        {
-            break;
-        }
-
-        // ì „ë¶€ ê³µë°±ìœ¼ë¡œ ì´ˆê¸°í™” í•œ í›„ ê° ìœ„ì¹˜ì— ê°’ì„ ëŒ€ì…
+            
+        pstEntry = &info[i];
+        // ÀüºÎ °ø¹éÀ¸·Î ÃÊ±âÈ­ ÇÑ ÈÄ °¢ À§Ä¡¿¡ °ªÀ» ´ëÀÔ
         kMemSet( vcBuffer, ' ', sizeof( vcBuffer ) - 1 );
         vcBuffer[ sizeof( vcBuffer ) - 1 ] = '\0';
-
-        // íŒŒì¼ ì´ë¦„ ì‚½ì…
-        kMemCpy( vcBuffer, pstEntry->d_name,
+        
+        if(pstEntry->type == 0){
+        // ÆÄÀÏ ÀÌ¸§ »ğÀÔ
+        kMemCpy( vcBuffer, pstEntry->d_name, 
                  kStrLen( pstEntry->d_name ) );
 
-        // íŒŒì¼ ê¸¸ì´ ì‚½ì…
+        // ÆÄÀÏ ±æÀÌ »ğÀÔ
         kSPrintf( vcTempValue, "%d Byte", pstEntry->dwFileSize );
-        kMemCpy( vcBuffer + 30, vcTempValue, kStrLen( vcTempValue ) );
+        kMemCpy( vcBuffer + 30, vcTempValue, kStrLen( vcTempValue )  );
 
-        // íŒŒì¼ì˜ ì‹œì‘ í´ëŸ¬ìŠ¤í„° ì‚½ì…
+        // ÆÄÀÏÀÇ ½ÃÀÛ Å¬·¯½ºÅÍ »ğÀÔ
         kSPrintf( vcTempValue, "0x%X Cluster", pstEntry->dwStartClusterIndex );
         kMemCpy( vcBuffer + 55, vcTempValue, kStrLen( vcTempValue ) + 1 );
+
         kPrintf( "    %s\n", vcBuffer );
 
-        if( ( iCount != 0 ) && ( ( iCount % 20 ) == 0 ) )
-        {
-            kPrintf( "Press any key to continue... ('q' is exit) : " );
-            if( kGetCh() == 'q' )
-            {
-                kPrintf( "\n" );
-                break;
-            }
         }
-        iCount++;
-    }
+        
+        else if(pstEntry->type == 1){
+            // ÆÄÀÏ ÀÌ¸§ »ğÀÔ
+            kMemCpy( vcBuffer, pstEntry->d_name, kStrLen( pstEntry->d_name ) );
 
-    // ì´ íŒŒì¼ì˜ ê°œìˆ˜ì™€ íŒŒì¼ì˜ ì´ í¬ê¸°ë¥¼ ì¶œë ¥
-    kPrintf( "\t\tTotal File Count: %d\n", iTotalCount );
-    kPrintf( "\t\tTotal File Size: %d KByte (%d Cluster)\n", dwTotalByte,
-             dwUsedClusterCount );
+            // ÆÄÀÏ ±æÀÌ »ğÀÔ
+            kSPrintf( vcTempValue, "Directory", 10 );
+            kMemCpy( vcBuffer + 30, vcTempValue, kStrLen( vcTempValue ) +1);
+            kPrintf( "    %s\n", vcBuffer );        
+            } 
+        }
+    }       
+    // // ·çÆ® µğ·ºÅÍ¸®¸¦ ¿®
+    // pstDirectory = opendir( "/" );
+    // if( pstDirectory == NULL )
+    // {
+    //     kPrintf( "Root Directory Open Fail\n" );
+    //     return ;
+    // }
 
-    // ë‚¨ì€ í´ëŸ¬ìŠ¤í„° ìˆ˜ë¥¼ ì´ìš©í•´ì„œ ì—¬ìœ  ê³µê°„ì„ ì¶œë ¥
-    kPrintf( "\t\tFree Space: %d KByte (%d Cluster)\n",
-             ( stManager.dwTotalClusterCount - dwUsedClusterCount ) *
-             FILESYSTEM_CLUSTERSIZE / 1024, stManager.dwTotalClusterCount -
-             dwUsedClusterCount );
+    // ¸ÕÀú ·çÇÁ¸¦ µ¹¸é¼­ µğ·ºÅÍ¸®¿¡ ÀÖ´Â ÆÄÀÏÀÇ °³¼ö¿Í ÀüÃ¼ ÆÄÀÏÀÌ »ç¿ëÇÑ Å©±â¸¦ °è»ê
+    // iTotalCount = 0;
+    // dwTotalByte = 0;
+    // dwUsedClusterCount = 0;
+    // while( 1 )
+    // {
+    //     // µğ·ºÅÍ¸®¿¡¼­ ¿£Æ®¸® ÇÏ³ª¸¦ ÀĞÀ½
+    //     pstEntry = readdir( pstDirectory );
+    //     // ´õÀÌ»ó ÆÄÀÏÀÌ ¾øÀ¸¸é ³ª°¨
+    //     if( pstEntry == NULL )
+    //     {
+    //         break;
+    //     }
+    //     iTotalCount++;
+    //     dwTotalByte += pstEntry->dwFileSize;
 
-    // ë””ë ‰í„°ë¦¬ë¥¼ ë‹«ìŒ
-    closedir( pstDirectory );
+    //     // ½ÇÁ¦·Î »ç¿ëµÈ Å¬·¯½ºÅÍÀÇ °³¼ö¸¦ °è»ê
+    //     if( pstEntry->dwFileSize == 0 )
+    //     {
+    //         // Å©±â°¡ 0ÀÌ¶óµµ Å¬·¯½ºÅÍ 1°³´Â ÇÒ´çµÇ¾î ÀÖÀ½
+    //         dwUsedClusterCount++;
+    //     }
+    //     else
+    //     {
+    //         // Å¬·¯½ºÅÍ °³¼ö¸¦ ¿Ã¸²ÇÏ¿© ´õÇÔ
+    //         dwUsedClusterCount += ( pstEntry->dwFileSize +
+    //             ( FILESYSTEM_CLUSTERSIZE - 1 ) ) / FILESYSTEM_CLUSTERSIZE;
+    //     }
+    // }
+
+    // // ½ÇÁ¦ ÆÄÀÏÀÇ ³»¿ëÀ» Ç¥½ÃÇÏ´Â ·çÇÁ
+    // rewinddir( pstDirectory );
+    // iCount = 0;
+    // while( 1 )
+    // {
+    //     // µğ·ºÅÍ¸®¿¡¼­ ¿£Æ®¸® ÇÏ³ª¸¦ ÀĞÀ½
+    //     pstEntry = readdir( pstDirectory );
+    //     // ´õÀÌ»ó ÆÄÀÏÀÌ ¾øÀ¸¸é ³ª°¨
+    //     if( pstEntry == NULL )
+    //     {
+    //         break;
+    //     }
+
+    //     // ÀüºÎ °ø¹éÀ¸·Î ÃÊ±âÈ­ ÇÑ ÈÄ °¢ À§Ä¡¿¡ °ªÀ» ´ëÀÔ
+    //     kMemSet( vcBuffer, ' ', sizeof( vcBuffer ) - 1 );
+    //     vcBuffer[ sizeof( vcBuffer ) - 1 ] = '\0';
+
+    //     // ÆÄÀÏ ÀÌ¸§ »ğÀÔ
+    //     kMemCpy( vcBuffer, pstEntry->d_name,
+    //              kStrLen( pstEntry->d_name ) );
+
+    //     // ÆÄÀÏ ±æÀÌ »ğÀÔ
+    //     kSPrintf( vcTempValue, "%d Byte", pstEntry->dwFileSize );
+    //     kMemCpy( vcBuffer + 30, vcTempValue, kStrLen( vcTempValue ) );
+
+    //     // ÆÄÀÏÀÇ ½ÃÀÛ Å¬·¯½ºÅÍ »ğÀÔ
+    //     kSPrintf( vcTempValue, "0x%X Cluster", pstEntry->dwStartClusterIndex );
+    //     kMemCpy( vcBuffer + 55, vcTempValue, kStrLen( vcTempValue ) + 1 );
+    //     kPrintf( "    %s\n", vcBuffer );
+
+    //     if( ( iCount != 0 ) && ( ( iCount % 20 ) == 0 ) )
+    //     {
+    //         kPrintf( "Press any key to continue... ('q' is exit) : " );
+    //         if( kGetCh() == 'q' )
+    //         {
+    //             kPrintf( "\n" );
+    //             break;
+    //         }
+    //     }
+    //     iCount++;
+    // }
+
+    // // ÃÑ ÆÄÀÏÀÇ °³¼ö¿Í ÆÄÀÏÀÇ ÃÑ Å©±â¸¦ Ãâ·Â
+    // kPrintf( "\t\tTotal File Count: %d\n", iTotalCount );
+    // kPrintf( "\t\tTotal File Size: %d KByte (%d Cluster)\n", dwTotalByte,
+    //          dwUsedClusterCount );
+
+    // // ³²Àº Å¬·¯½ºÅÍ ¼ö¸¦ ÀÌ¿ëÇØ¼­ ¿©À¯ °ø°£À» Ãâ·Â
+    // kPrintf( "\t\tFree Space: %d KByte (%d Cluster)\n",
+    //          ( stManager.dwTotalClusterCount - dwUsedClusterCount ) *
+    //          FILESYSTEM_CLUSTERSIZE / 1024, stManager.dwTotalClusterCount -
+    //          dwUsedClusterCount );
+
+    // // µğ·ºÅÍ¸®¸¦ ´İÀ½
+    // closedir( pstDirectory );
 }
 
 /**
- *  íŒŒì¼ì„ ìƒì„±í•˜ì—¬ í‚¤ë³´ë“œë¡œ ì…ë ¥ëœ ë°ì´í„°ë¥¼ ì”€
+ *  ÆÄÀÏÀ» »ı¼ºÇÏ¿© Å°º¸µå·Î ÀÔ·ÂµÈ µ¥ÀÌÅÍ¸¦ ¾¸
  */
 static void kWriteDataToFile( const char* pcParameterBuffer )
 {
@@ -1816,7 +1863,7 @@ static void kWriteDataToFile( const char* pcParameterBuffer )
     int iEnterCount;
     BYTE bKey;
 
-    // íŒŒë¼ë¯¸í„° ë¦¬ìŠ¤íŠ¸ë¥¼ ì´ˆê¸°í™”í•˜ì—¬ íŒŒì¼ ì´ë¦„ì„ ì¶”ì¶œ
+    // ÆÄ¶ó¹ÌÅÍ ¸®½ºÆ®¸¦ ÃÊ±âÈ­ÇÏ¿© ÆÄÀÏ ÀÌ¸§À» ÃßÃâ
     kInitializeParameter( &stList, pcParameterBuffer );
     iLength = kGetNextParameter( &stList, vcFileName );
     vcFileName[ iLength ] = '\0';
@@ -1826,7 +1873,7 @@ static void kWriteDataToFile( const char* pcParameterBuffer )
         return ;
     }
 
-    // íŒŒì¼ ìƒì„±
+    // ÆÄÀÏ »ı¼º
     fp = fopen( vcFileName, "w" );
     if( fp == NULL )
     {
@@ -1834,12 +1881,12 @@ static void kWriteDataToFile( const char* pcParameterBuffer )
         return ;
     }
 
-    // ì—”í„° í‚¤ê°€ ì—°ì†ìœ¼ë¡œ 3ë²ˆ ëˆŒëŸ¬ì§ˆ ë•Œê¹Œì§€ ë‚´ìš©ì„ íŒŒì¼ì— ì”€
+    // ¿£ÅÍ Å°°¡ ¿¬¼ÓÀ¸·Î 3¹ø ´­·¯Áú ¶§±îÁö ³»¿ëÀ» ÆÄÀÏ¿¡ ¾¸
     iEnterCount = 0;
     while( 1 )
     {
         bKey = kGetCh();
-        // ì—”í„° í‚¤ì´ë©´ ì—°ì† 3ë²ˆ ëˆŒëŸ¬ì¡ŒëŠ”ê°€ í™•ì¸í•˜ì—¬ ë£¨í”„ë¥¼ ë¹ ì ¸ ë‚˜ê°
+        // ¿£ÅÍ Å°ÀÌ¸é ¿¬¼Ó 3¹ø ´­·¯Á³´Â°¡ È®ÀÎÇÏ¿© ·çÇÁ¸¦ ºüÁ® ³ª°¨
         if( bKey == KEY_ENTER )
         {
             iEnterCount++;
@@ -1848,7 +1895,7 @@ static void kWriteDataToFile( const char* pcParameterBuffer )
                 break;
             }
         }
-        // ì—”í„° í‚¤ê°€ ì•„ë‹ˆë¼ë©´ ì—”í„° í‚¤ ì…ë ¥ íšŸìˆ˜ë¥¼ ì´ˆê¸°í™”
+        // ¿£ÅÍ Å°°¡ ¾Æ´Ï¶ó¸é ¿£ÅÍ Å° ÀÔ·Â È½¼ö¸¦ ÃÊ±âÈ­
         else
         {
             iEnterCount = 0;
@@ -1867,7 +1914,7 @@ static void kWriteDataToFile( const char* pcParameterBuffer )
 }
 
 /**
- *  íŒŒì¼ì„ ì—´ì–´ì„œ ë°ì´í„°ë¥¼ ì½ìŒ
+ *  ÆÄÀÏÀ» ¿­¾î¼­ µ¥ÀÌÅÍ¸¦ ÀĞÀ½
  */
 static void kReadDataFromFile( const char* pcParameterBuffer )
 {
@@ -1878,7 +1925,7 @@ static void kReadDataFromFile( const char* pcParameterBuffer )
     int iEnterCount;
     BYTE bKey;
 
-    // íŒŒë¼ë¯¸í„° ë¦¬ìŠ¤íŠ¸ë¥¼ ì´ˆê¸°í™”í•˜ì—¬ íŒŒì¼ ì´ë¦„ì„ ì¶”ì¶œ
+    // ÆÄ¶ó¹ÌÅÍ ¸®½ºÆ®¸¦ ÃÊ±âÈ­ÇÏ¿© ÆÄÀÏ ÀÌ¸§À» ÃßÃâ
     kInitializeParameter( &stList, pcParameterBuffer );
     iLength = kGetNextParameter( &stList, vcFileName );
     vcFileName[ iLength ] = '\0';
@@ -1888,7 +1935,7 @@ static void kReadDataFromFile( const char* pcParameterBuffer )
         return ;
     }
 
-    // íŒŒì¼ ìƒì„±
+    // ÆÄÀÏ »ı¼º
     fp = fopen( vcFileName, "r" );
     if( fp == NULL )
     {
@@ -1896,7 +1943,7 @@ static void kReadDataFromFile( const char* pcParameterBuffer )
         return ;
     }
 
-    // íŒŒì¼ì˜ ëê¹Œì§€ ì¶œë ¥í•˜ëŠ” ê²ƒì„ ë°˜ë³µ
+    // ÆÄÀÏÀÇ ³¡±îÁö Ãâ·ÂÇÏ´Â °ÍÀ» ¹İº¹
     iEnterCount = 0;
     while( 1 )
     {
@@ -1906,8 +1953,8 @@ static void kReadDataFromFile( const char* pcParameterBuffer )
         }
         kPrintf( "%c", bKey );
 
-        // ë§Œì•½ ì—”í„° í‚¤ì´ë©´ ì—”í„° í‚¤ íšŸìˆ˜ë¥¼ ì¦ê°€ì‹œí‚¤ê³  20ë¼ì¸ê¹Œì§€ ì¶œë ¥í–ˆë‹¤ë©´
-        // ë” ì¶œë ¥í• ì§€ ì—¬ë¶€ë¥¼ ë¬¼ì–´ë´„
+        // ¸¸¾à ¿£ÅÍ Å°ÀÌ¸é ¿£ÅÍ Å° È½¼ö¸¦ Áõ°¡½ÃÅ°°í 20¶óÀÎ±îÁö Ãâ·ÂÇß´Ù¸é
+        // ´õ Ãâ·ÂÇÒÁö ¿©ºÎ¸¦ ¹°¾îº½
         if( bKey == KEY_ENTER )
         {
             iEnterCount++;
@@ -1929,7 +1976,7 @@ static void kReadDataFromFile( const char* pcParameterBuffer )
 }
 
 /**
- *  íŒŒì¼ I/Oì— ê´€ë ¨ëœ ê¸°ëŠ¥ì„ í…ŒìŠ¤íŠ¸
+ *  ÆÄÀÏ I/O¿¡ °ü·ÃµÈ ±â´ÉÀ» Å×½ºÆ®
  */
 static void kTestFileIO( const char* pcParameterBuffer )
 {
@@ -1944,7 +1991,7 @@ static void kTestFileIO( const char* pcParameterBuffer )
 
     kPrintf( "================== File I/O Function Test ==================\n" );
 
-    // 4Mbyteì˜ ë²„í¼ í• ë‹¹
+    // 4MbyteÀÇ ¹öÆÛ ÇÒ´ç
     dwMaxFileSize = 4 * 1024 * 1024;
     pbBuffer = kAllocateMemory( dwMaxFileSize );
     if( pbBuffer == NULL )
@@ -1952,14 +1999,14 @@ static void kTestFileIO( const char* pcParameterBuffer )
         kPrintf( "Memory Allocation Fail\n" );
         return ;
     }
-    // í…ŒìŠ¤íŠ¸ìš© íŒŒì¼ì„ ì‚­ì œ
+    // Å×½ºÆ®¿ë ÆÄÀÏÀ» »èÁ¦
     remove( "testfileio.bin" );
 
     //==========================================================================
-    // íŒŒì¼ ì—´ê¸° í…ŒìŠ¤íŠ¸
+    // ÆÄÀÏ ¿­±â Å×½ºÆ®
     //==========================================================================
     kPrintf( "1. File Open Fail Test..." );
-    // r ì˜µì…˜ì€ íŒŒì¼ì„ ìƒì„±í•˜ì§€ ì•Šìœ¼ë¯€ë¡œ, í…ŒìŠ¤íŠ¸ íŒŒì¼ì´ ì—†ëŠ” ê²½ìš° NULLì´ ë˜ì–´ì•¼ í•¨
+    // r ¿É¼ÇÀº ÆÄÀÏÀ» »ı¼ºÇÏÁö ¾ÊÀ¸¹Ç·Î, Å×½ºÆ® ÆÄÀÏÀÌ ¾ø´Â °æ¿ì NULLÀÌ µÇ¾î¾ß ÇÔ
     pstFile = fopen( "testfileio.bin", "r" );
     if( pstFile == NULL )
     {
@@ -1972,10 +2019,10 @@ static void kTestFileIO( const char* pcParameterBuffer )
     }
 
     //==========================================================================
-    // íŒŒì¼ ìƒì„± í…ŒìŠ¤íŠ¸
+    // ÆÄÀÏ »ı¼º Å×½ºÆ®
     //==========================================================================
     kPrintf( "2. File Create Test..." );
-    // w ì˜µì…˜ì€ íŒŒì¼ì„ ìƒì„±í•˜ë¯€ë¡œ, ì •ìƒì ìœ¼ë¡œ í•¸ë“¤ì´ ë°˜í™˜ë˜ì–´ì•¼í•¨
+    // w ¿É¼ÇÀº ÆÄÀÏÀ» »ı¼ºÇÏ¹Ç·Î, Á¤»óÀûÀ¸·Î ÇÚµéÀÌ ¹İÈ¯µÇ¾î¾ßÇÔ
     pstFile = fopen( "testfileio.bin", "w" );
     if( pstFile != NULL )
     {
@@ -1988,10 +2035,10 @@ static void kTestFileIO( const char* pcParameterBuffer )
     }
 
     //==========================================================================
-    // ìˆœì°¨ì ì¸ ì˜ì—­ ì“°ê¸° í…ŒìŠ¤íŠ¸
+    // ¼øÂ÷ÀûÀÎ ¿µ¿ª ¾²±â Å×½ºÆ®
     //==========================================================================
     kPrintf( "3. Sequential Write Test(Cluster Size)..." );
-    // ì—´ë¦° í•¸ë“¤ì„ ê°€ì§€ê³  ì“°ê¸° ìˆ˜í–‰
+    // ¿­¸° ÇÚµéÀ» °¡Áö°í ¾²±â ¼öÇà
     for( i = 0 ; i < 100 ; i++ )
     {
         kMemSet( pbBuffer, i, FILESYSTEM_CLUSTERSIZE );
@@ -2009,16 +2056,16 @@ static void kTestFileIO( const char* pcParameterBuffer )
     }
 
     //==========================================================================
-    // ìˆœì°¨ì ì¸ ì˜ì—­ ì½ê¸° í…ŒìŠ¤íŠ¸
+    // ¼øÂ÷ÀûÀÎ ¿µ¿ª ÀĞ±â Å×½ºÆ®
     //==========================================================================
     kPrintf( "4. Sequential Read And Verify Test(Cluster Size)..." );
-    // íŒŒì¼ì˜ ì²˜ìŒìœ¼ë¡œ ì´ë™
+    // ÆÄÀÏÀÇ Ã³À½À¸·Î ÀÌµ¿
     fseek( pstFile, -100 * FILESYSTEM_CLUSTERSIZE, SEEK_END );
 
-    // ì—´ë¦° í•¸ë“¤ì„ ê°€ì§€ê³  ì½ê¸° ìˆ˜í–‰ í›„, ë°ì´í„° ê²€ì¦
+    // ¿­¸° ÇÚµéÀ» °¡Áö°í ÀĞ±â ¼öÇà ÈÄ, µ¥ÀÌÅÍ °ËÁõ
     for( i = 0 ; i < 100 ; i++ )
     {
-        // íŒŒì¼ì„ ì½ìŒ
+        // ÆÄÀÏÀ» ÀĞÀ½
         if( fread( pbBuffer, 1, FILESYSTEM_CLUSTERSIZE, pstFile ) !=
             FILESYSTEM_CLUSTERSIZE )
         {
@@ -2026,7 +2073,7 @@ static void kTestFileIO( const char* pcParameterBuffer )
             return ;
         }
 
-        // ë°ì´í„° ê²€ì‚¬
+        // µ¥ÀÌÅÍ °Ë»ç
         for( j = 0 ; j < FILESYSTEM_CLUSTERSIZE ; j++ )
         {
             if( pbBuffer[ j ] != ( BYTE ) i )
@@ -2044,18 +2091,18 @@ static void kTestFileIO( const char* pcParameterBuffer )
     }
 
     //==========================================================================
-    // ì„ì˜ì˜ ì˜ì—­ ì“°ê¸° í…ŒìŠ¤íŠ¸
+    // ÀÓÀÇÀÇ ¿µ¿ª ¾²±â Å×½ºÆ®
     //==========================================================================
     kPrintf( "5. Random Write Test...\n" );
 
-    // ë²„í¼ë¥¼ ëª¨ë‘ 0ìœ¼ë¡œ ì±„ì›€
+    // ¹öÆÛ¸¦ ¸ğµÎ 0À¸·Î Ã¤¿ò
     kMemSet( pbBuffer, 0, dwMaxFileSize );
-    // ì—¬ê¸° ì €ê¸°ì— ì˜®ê²¨ë‹¤ë‹ˆë©´ì„œ ë°ì´í„°ë¥¼ ì“°ê³  ê²€ì¦
-    // íŒŒì¼ì˜ ë‚´ìš©ì„ ì½ì–´ì„œ ë²„í¼ë¡œ ë³µì‚¬
+    // ¿©±â Àú±â¿¡ ¿Å°Ü´Ù´Ï¸é¼­ µ¥ÀÌÅÍ¸¦ ¾²°í °ËÁõ
+    // ÆÄÀÏÀÇ ³»¿ëÀ» ÀĞ¾î¼­ ¹öÆÛ·Î º¹»ç
     fseek( pstFile, -100 * FILESYSTEM_CLUSTERSIZE, SEEK_CUR );
     fread( pbBuffer, 1, dwMaxFileSize, pstFile );
 
-    // ì„ì˜ì˜ ìœ„ì¹˜ë¡œ ì˜®ê¸°ë©´ì„œ ë°ì´í„°ë¥¼ íŒŒì¼ê³¼ ë²„í¼ì— ë™ì‹œì— ì”€
+    // ÀÓÀÇÀÇ À§Ä¡·Î ¿Å±â¸é¼­ µ¥ÀÌÅÍ¸¦ ÆÄÀÏ°ú ¹öÆÛ¿¡ µ¿½Ã¿¡ ¾¸
     for( i = 0 ; i < 100 ; i++ )
     {
         dwByteCount = ( kRandom() % ( sizeof( vbTempBuffer ) - 1 ) ) + 1;
@@ -2064,11 +2111,11 @@ static void kTestFileIO( const char* pcParameterBuffer )
         kPrintf( "    [%d] Offset [%d] Byte [%d]...", i, dwRandomOffset,
                 dwByteCount );
 
-        // íŒŒì¼ í¬ì¸í„°ë¥¼ ì´ë™
+        // ÆÄÀÏ Æ÷ÀÎÅÍ¸¦ ÀÌµ¿
         fseek( pstFile, dwRandomOffset, SEEK_SET );
         kMemSet( vbTempBuffer, i, dwByteCount );
 
-        // ë°ì´í„°ë¥¼ ì”€
+        // µ¥ÀÌÅÍ¸¦ ¾¸
         if( fwrite( vbTempBuffer, 1, dwByteCount, pstFile ) != dwByteCount )
         {
             kPrintf( "[Fail]\n" );
@@ -2082,16 +2129,16 @@ static void kTestFileIO( const char* pcParameterBuffer )
         kMemSet( pbBuffer + dwRandomOffset, i, dwByteCount );
     }
 
-    // ë§¨ ë§ˆì§€ë§‰ìœ¼ë¡œ ì´ë™í•˜ì—¬ 1ë°”ì´íŠ¸ë¥¼ ì¨ì„œ íŒŒì¼ì˜ í¬ê¸°ë¥¼ 4Mbyteë¡œ ë§Œë“¦
+    // ¸Ç ¸¶Áö¸·À¸·Î ÀÌµ¿ÇÏ¿© 1¹ÙÀÌÆ®¸¦ ½á¼­ ÆÄÀÏÀÇ Å©±â¸¦ 4Mbyte·Î ¸¸µê
     fseek( pstFile, dwMaxFileSize - 1, SEEK_SET );
     fwrite( &i, 1, 1, pstFile );
     pbBuffer[ dwMaxFileSize - 1 ] = ( BYTE ) i;
 
     //==========================================================================
-    // ì„ì˜ì˜ ì˜ì—­ ì½ê¸° í…ŒìŠ¤íŠ¸
+    // ÀÓÀÇÀÇ ¿µ¿ª ÀĞ±â Å×½ºÆ®
     //==========================================================================
     kPrintf( "6. Random Read And Verify Test...\n" );
-    // ì„ì˜ì˜ ìœ„ì¹˜ë¡œ ì˜®ê¸°ë©´ì„œ íŒŒì¼ì—ì„œ ë°ì´í„°ë¥¼ ì½ì–´ ë²„í¼ì˜ ë‚´ìš©ê³¼ ë¹„êµ
+    // ÀÓÀÇÀÇ À§Ä¡·Î ¿Å±â¸é¼­ ÆÄÀÏ¿¡¼­ µ¥ÀÌÅÍ¸¦ ÀĞ¾î ¹öÆÛÀÇ ³»¿ë°ú ºñ±³
     for( i = 0 ; i < 100 ; i++ )
     {
         dwByteCount = ( kRandom() % ( sizeof( vbTempBuffer ) - 1 ) ) + 1;
@@ -2100,10 +2147,10 @@ static void kTestFileIO( const char* pcParameterBuffer )
         kPrintf( "    [%d] Offset [%d] Byte [%d]...", i, dwRandomOffset,
                 dwByteCount );
 
-        // íŒŒì¼ í¬ì¸í„°ë¥¼ ì´ë™
+        // ÆÄÀÏ Æ÷ÀÎÅÍ¸¦ ÀÌµ¿
         fseek( pstFile, dwRandomOffset, SEEK_SET );
 
-        // ë°ì´í„° ì½ìŒ
+        // µ¥ÀÌÅÍ ÀĞÀ½
         if( fread( vbTempBuffer, 1, dwByteCount, pstFile ) != dwByteCount )
         {
             kPrintf( "[Fail]\n" );
@@ -2111,7 +2158,7 @@ static void kTestFileIO( const char* pcParameterBuffer )
             break;
         }
 
-        // ë²„í¼ì™€ ë¹„êµ
+        // ¹öÆÛ¿Í ºñ±³
         if( kMemCmp( pbBuffer + dwRandomOffset, vbTempBuffer, dwByteCount )
                 != 0 )
         {
@@ -2124,18 +2171,18 @@ static void kTestFileIO( const char* pcParameterBuffer )
     }
 
     //==========================================================================
-    // ë‹¤ì‹œ ìˆœì°¨ì ì¸ ì˜ì—­ ì½ê¸° í…ŒìŠ¤íŠ¸
+    // ´Ù½Ã ¼øÂ÷ÀûÀÎ ¿µ¿ª ÀĞ±â Å×½ºÆ®
     //==========================================================================
     kPrintf( "7. Sequential Write, Read And Verify Test(1024 Byte)...\n" );
-    // íŒŒì¼ì˜ ì²˜ìŒìœ¼ë¡œ ì´ë™
+    // ÆÄÀÏÀÇ Ã³À½À¸·Î ÀÌµ¿
     fseek( pstFile, -dwMaxFileSize, SEEK_CUR );
 
-    // ì—´ë¦° í•¸ë“¤ì„ ê°€ì§€ê³  ì“°ê¸° ìˆ˜í–‰. ì•ë¶€ë¶„ì—ì„œ 2Mbyteë§Œ ì”€
+    // ¿­¸° ÇÚµéÀ» °¡Áö°í ¾²±â ¼öÇà. ¾ÕºÎºĞ¿¡¼­ 2Mbyte¸¸ ¾¸
     for( i = 0 ; i < ( 2 * 1024 * 1024 / 1024 ) ; i++ )
     {
         kPrintf( "    [%d] Offset [%d] Byte [%d] Write...", i, i * 1024, 1024 );
 
-        // 1024 ë°”ì´íŠ¸ì”© íŒŒì¼ì„ ì”€
+        // 1024 ¹ÙÀÌÆ®¾¿ ÆÄÀÏÀ» ¾¸
         if( fwrite( pbBuffer + ( i * 1024 ), 1, 1024, pstFile ) != 1024 )
         {
             kPrintf( "[Fail]\n" );
@@ -2147,18 +2194,18 @@ static void kTestFileIO( const char* pcParameterBuffer )
         }
     }
 
-    // íŒŒì¼ì˜ ì²˜ìŒìœ¼ë¡œ ì´ë™
+    // ÆÄÀÏÀÇ Ã³À½À¸·Î ÀÌµ¿
     fseek( pstFile, -dwMaxFileSize, SEEK_SET );
 
-    // ì—´ë¦° í•¸ë“¤ì„ ê°€ì§€ê³  ì½ê¸° ìˆ˜í–‰ í›„ ë°ì´í„° ê²€ì¦. Random Writeë¡œ ë°ì´í„°ê°€ ì˜ëª»
-    // ì €ì¥ë  ìˆ˜ ìˆìœ¼ë¯€ë¡œ ê²€ì¦ì€ 4Mbyte ì „ì²´ë¥¼ ëŒ€ìƒìœ¼ë¡œ í•¨
+    // ¿­¸° ÇÚµéÀ» °¡Áö°í ÀĞ±â ¼öÇà ÈÄ µ¥ÀÌÅÍ °ËÁõ. Random Write·Î µ¥ÀÌÅÍ°¡ Àß¸ø
+    // ÀúÀåµÉ ¼ö ÀÖÀ¸¹Ç·Î °ËÁõÀº 4Mbyte ÀüÃ¼¸¦ ´ë»óÀ¸·Î ÇÔ
     for( i = 0 ; i < ( dwMaxFileSize / 1024 )  ; i++ )
     {
-        // ë°ì´í„° ê²€ì‚¬
+        // µ¥ÀÌÅÍ °Ë»ç
         kPrintf( "    [%d] Offset [%d] Byte [%d] Read And Verify...", i,
                 i * 1024, 1024 );
 
-        // 1024 ë°”ì´íŠ¸ì”© íŒŒì¼ì„ ì½ìŒ
+        // 1024 ¹ÙÀÌÆ®¾¿ ÆÄÀÏÀ» ÀĞÀ½
         if( fread( vbTempBuffer, 1, 1024, pstFile ) != 1024 )
         {
             kPrintf( "[Fail]\n" );
@@ -2177,10 +2224,10 @@ static void kTestFileIO( const char* pcParameterBuffer )
     }
 
     //==========================================================================
-    // íŒŒì¼ ì‚­ì œ ì‹¤íŒ¨ í…ŒìŠ¤íŠ¸
+    // ÆÄÀÏ »èÁ¦ ½ÇÆĞ Å×½ºÆ®
     //==========================================================================
     kPrintf( "8. File Delete Fail Test..." );
-    // íŒŒì¼ì´ ì—´ë ¤ìˆëŠ” ìƒíƒœì´ë¯€ë¡œ íŒŒì¼ì„ ì§€ìš°ë ¤ê³  í•˜ë©´ ì‹¤íŒ¨í•´ì•¼ í•¨
+    // ÆÄÀÏÀÌ ¿­·ÁÀÖ´Â »óÅÂÀÌ¹Ç·Î ÆÄÀÏÀ» Áö¿ì·Á°í ÇÏ¸é ½ÇÆĞÇØ¾ß ÇÔ
     if( remove( "testfileio.bin" ) != 0 )
     {
         kPrintf( "[Pass]\n" );
@@ -2191,10 +2238,10 @@ static void kTestFileIO( const char* pcParameterBuffer )
     }
 
     //==========================================================================
-    // íŒŒì¼ ë‹«ê¸° í…ŒìŠ¤íŠ¸
+    // ÆÄÀÏ ´İ±â Å×½ºÆ®
     //==========================================================================
     kPrintf( "9. File Close Test..." );
-    // íŒŒì¼ì´ ì •ìƒì ìœ¼ë¡œ ë‹«í˜€ì•¼ í•¨
+    // ÆÄÀÏÀÌ Á¤»óÀûÀ¸·Î ´İÇô¾ß ÇÔ
     if( fclose( pstFile ) == 0 )
     {
         kPrintf( "[Pass]\n" );
@@ -2205,10 +2252,10 @@ static void kTestFileIO( const char* pcParameterBuffer )
     }
 
     //==========================================================================
-    // íŒŒì¼ ì‚­ì œ í…ŒìŠ¤íŠ¸
+    // ÆÄÀÏ »èÁ¦ Å×½ºÆ®
     //==========================================================================
     kPrintf( "10. File Delete Test..." );
-    // íŒŒì¼ì´ ë‹«í˜”ìœ¼ë¯€ë¡œ ì •ìƒì ìœ¼ë¡œ ì§€ì›Œì ¸ì•¼ í•¨
+    // ÆÄÀÏÀÌ ´İÇûÀ¸¹Ç·Î Á¤»óÀûÀ¸·Î Áö¿öÁ®¾ß ÇÔ
     if( remove( "testfileio.bin" ) == 0 )
     {
         kPrintf( "[Pass]\n" );
@@ -2218,12 +2265,12 @@ static void kTestFileIO( const char* pcParameterBuffer )
         kPrintf( "[Fail]\n" );
     }
 
-    // ë©”ëª¨ë¦¬ë¥¼ í•´ì œ
+    // ¸Ş¸ğ¸®¸¦ ÇØÁ¦
     kFreeMemory( pbBuffer );
 }
 
 /**
- *  íŒŒì¼ì„ ì½ê³  ì“°ëŠ” ì†ë„ë¥¼ ì¸¡ì •
+ *  ÆÄÀÏÀ» ÀĞ°í ¾²´Â ¼Óµµ¸¦ ÃøÁ¤
  */
 static void kTestPerformance( const char* pcParameterBuffer )
 {
@@ -2234,12 +2281,12 @@ static void kTestPerformance( const char* pcParameterBuffer )
     DWORD i;
     BYTE* pbBuffer;
 
-    // í´ëŸ¬ìŠ¤í„°ëŠ” 1Mbyteê¹Œì§€ íŒŒì¼ì„ í…ŒìŠ¤íŠ¸
+    // Å¬·¯½ºÅÍ´Â 1Mbyte±îÁö ÆÄÀÏÀ» Å×½ºÆ®
     dwClusterTestFileSize = 1024 * 1024;
-    // 1ë°”ì´íŠ¸ì”© ì½ê³  ì“°ëŠ” í…ŒìŠ¤íŠ¸ëŠ” ì‹œê°„ì´ ë§ì´ ê±¸ë¦¬ë¯€ë¡œ 16Kbyteë§Œ í…ŒìŠ¤íŠ¸
+    // 1¹ÙÀÌÆ®¾¿ ÀĞ°í ¾²´Â Å×½ºÆ®´Â ½Ã°£ÀÌ ¸¹ÀÌ °É¸®¹Ç·Î 16Kbyte¸¸ Å×½ºÆ®
     dwOneByteTestFileSize = 16 * 1024;
 
-    // í…ŒìŠ¤íŠ¸ìš© ë²„í¼ ë©”ëª¨ë¦¬ í• ë‹¹
+    // Å×½ºÆ®¿ë ¹öÆÛ ¸Ş¸ğ¸® ÇÒ´ç
     pbBuffer = kAllocateMemory( dwClusterTestFileSize );
     if( pbBuffer == NULL )
     {
@@ -2247,17 +2294,17 @@ static void kTestPerformance( const char* pcParameterBuffer )
         return ;
     }
 
-    // ë²„í¼ë¥¼ ì´ˆê¸°í™”
+    // ¹öÆÛ¸¦ ÃÊ±âÈ­
     kMemSet( pbBuffer, 0, FILESYSTEM_CLUSTERSIZE );
 
     kPrintf( "================== File I/O Performance Test ==================\n" );
 
     //==========================================================================
-    // í´ëŸ¬ìŠ¤í„° ë‹¨ìœ„ë¡œ íŒŒì¼ì„ ìˆœì°¨ì ìœ¼ë¡œ ì“°ëŠ” í…ŒìŠ¤íŠ¸
+    // Å¬·¯½ºÅÍ ´ÜÀ§·Î ÆÄÀÏÀ» ¼øÂ÷ÀûÀ¸·Î ¾²´Â Å×½ºÆ®
     //==========================================================================
     kPrintf( "1.Sequential Read/Write Test(Cluster Size)\n" );
 
-    // ê¸°ì¡´ì˜ í…ŒìŠ¤íŠ¸ íŒŒì¼ì„ ì œê±°í•˜ê³  ìƒˆë¡œ ë§Œë“¦
+    // ±âÁ¸ÀÇ Å×½ºÆ® ÆÄÀÏÀ» Á¦°ÅÇÏ°í »õ·Î ¸¸µê
     remove( "performance.txt" );
     pstFile = fopen( "performance.txt", "w" );
     if( pstFile == NULL )
@@ -2268,53 +2315,53 @@ static void kTestPerformance( const char* pcParameterBuffer )
     }
 
     qwLastTickCount = kGetTickCount();
-    // í´ëŸ¬ìŠ¤í„° ë‹¨ìœ„ë¡œ ì“°ëŠ” í…ŒìŠ¤íŠ¸
+    // Å¬·¯½ºÅÍ ´ÜÀ§·Î ¾²´Â Å×½ºÆ®
     for( i = 0 ; i < ( dwClusterTestFileSize / FILESYSTEM_CLUSTERSIZE ) ; i++ )
     {
         if( fwrite( pbBuffer, 1, FILESYSTEM_CLUSTERSIZE, pstFile ) !=
             FILESYSTEM_CLUSTERSIZE )
         {
             kPrintf( "Write Fail\n" );
-            // íŒŒì¼ì„ ë‹«ê³  ë©”ëª¨ë¦¬ë¥¼ í•´ì œí•¨
+            // ÆÄÀÏÀ» ´İ°í ¸Ş¸ğ¸®¸¦ ÇØÁ¦ÇÔ
             fclose( pstFile );
             kFreeMemory( pbBuffer );
             return ;
         }
     }
-    // ì‹œê°„ ì¶œë ¥
+    // ½Ã°£ Ãâ·Â
     kPrintf( "   Sequential Write(Cluster Size): %d ms\n", kGetTickCount() -
              qwLastTickCount );
 
     //==========================================================================
-    // í´ëŸ¬ìŠ¤í„° ë‹¨ìœ„ë¡œ íŒŒì¼ì„ ìˆœì°¨ì ìœ¼ë¡œ ì½ëŠ” í…ŒìŠ¤íŠ¸
+    // Å¬·¯½ºÅÍ ´ÜÀ§·Î ÆÄÀÏÀ» ¼øÂ÷ÀûÀ¸·Î ÀĞ´Â Å×½ºÆ®
     //==========================================================================
-    // íŒŒì¼ì˜ ì²˜ìŒìœ¼ë¡œ ì´ë™
+    // ÆÄÀÏÀÇ Ã³À½À¸·Î ÀÌµ¿
     fseek( pstFile, 0, SEEK_SET );
 
     qwLastTickCount = kGetTickCount();
-    // í´ëŸ¬ìŠ¤í„° ë‹¨ìœ„ë¡œ ì½ëŠ” í…ŒìŠ¤íŠ¸
+    // Å¬·¯½ºÅÍ ´ÜÀ§·Î ÀĞ´Â Å×½ºÆ®
     for( i = 0 ; i < ( dwClusterTestFileSize / FILESYSTEM_CLUSTERSIZE ) ; i++ )
     {
         if( fread( pbBuffer, 1, FILESYSTEM_CLUSTERSIZE, pstFile ) !=
             FILESYSTEM_CLUSTERSIZE )
         {
             kPrintf( "Read Fail\n" );
-            // íŒŒì¼ì„ ë‹«ê³  ë©”ëª¨ë¦¬ë¥¼ í•´ì œí•¨
+            // ÆÄÀÏÀ» ´İ°í ¸Ş¸ğ¸®¸¦ ÇØÁ¦ÇÔ
             fclose( pstFile );
             kFreeMemory( pbBuffer );
             return ;
         }
     }
-    // ì‹œê°„ ì¶œë ¥
+    // ½Ã°£ Ãâ·Â
     kPrintf( "   Sequential Read(Cluster Size): %d ms\n", kGetTickCount() -
              qwLastTickCount );
 
     //==========================================================================
-    // 1 ë°”ì´íŠ¸ ë‹¨ìœ„ë¡œ íŒŒì¼ì„ ìˆœì°¨ì ìœ¼ë¡œ ì“°ëŠ” í…ŒìŠ¤íŠ¸
+    // 1 ¹ÙÀÌÆ® ´ÜÀ§·Î ÆÄÀÏÀ» ¼øÂ÷ÀûÀ¸·Î ¾²´Â Å×½ºÆ®
     //==========================================================================
     kPrintf( "2.Sequential Read/Write Test(1 Byte)\n" );
 
-    // ê¸°ì¡´ì˜ í…ŒìŠ¤íŠ¸ íŒŒì¼ì„ ì œê±°í•˜ê³  ìƒˆë¡œ ë§Œë“¦
+    // ±âÁ¸ÀÇ Å×½ºÆ® ÆÄÀÏÀ» Á¦°ÅÇÏ°í »õ·Î ¸¸µê
     remove( "performance.txt" );
     pstFile = fopen( "performance.txt", "w" );
     if( pstFile == NULL )
@@ -2325,52 +2372,52 @@ static void kTestPerformance( const char* pcParameterBuffer )
     }
 
     qwLastTickCount = kGetTickCount();
-    // 1 ë°”ì´íŠ¸ ë‹¨ìœ„ë¡œ ì“°ëŠ” í…ŒìŠ¤íŠ¸
+    // 1 ¹ÙÀÌÆ® ´ÜÀ§·Î ¾²´Â Å×½ºÆ®
     for( i = 0 ; i < dwOneByteTestFileSize ; i++ )
     {
         if( fwrite( pbBuffer, 1, 1, pstFile ) != 1 )
         {
             kPrintf( "Write Fail\n" );
-            // íŒŒì¼ì„ ë‹«ê³  ë©”ëª¨ë¦¬ë¥¼ í•´ì œí•¨
+            // ÆÄÀÏÀ» ´İ°í ¸Ş¸ğ¸®¸¦ ÇØÁ¦ÇÔ
             fclose( pstFile );
             kFreeMemory( pbBuffer );
             return ;
         }
     }
-    // ì‹œê°„ ì¶œë ¥
+    // ½Ã°£ Ãâ·Â
     kPrintf( "   Sequential Write(1 Byte): %d ms\n", kGetTickCount() -
              qwLastTickCount );
 
     //==========================================================================
-    // 1 ë°”ì´íŠ¸ ë‹¨ìœ„ë¡œ íŒŒì¼ì„ ìˆœì°¨ì ìœ¼ë¡œ ì½ëŠ” í…ŒìŠ¤íŠ¸
+    // 1 ¹ÙÀÌÆ® ´ÜÀ§·Î ÆÄÀÏÀ» ¼øÂ÷ÀûÀ¸·Î ÀĞ´Â Å×½ºÆ®
     //==========================================================================
-    // íŒŒì¼ì˜ ì²˜ìŒìœ¼ë¡œ ì´ë™
+    // ÆÄÀÏÀÇ Ã³À½À¸·Î ÀÌµ¿
     fseek( pstFile, 0, SEEK_SET );
 
     qwLastTickCount = kGetTickCount();
-    // 1 ë°”ì´íŠ¸ ë‹¨ìœ„ë¡œ ì½ëŠ” í…ŒìŠ¤íŠ¸
+    // 1 ¹ÙÀÌÆ® ´ÜÀ§·Î ÀĞ´Â Å×½ºÆ®
     for( i = 0 ; i < dwOneByteTestFileSize ; i++ )
     {
         if( fread( pbBuffer, 1, 1, pstFile ) != 1 )
         {
             kPrintf( "Read Fail\n" );
-            // íŒŒì¼ì„ ë‹«ê³  ë©”ëª¨ë¦¬ë¥¼ í•´ì œí•¨
+            // ÆÄÀÏÀ» ´İ°í ¸Ş¸ğ¸®¸¦ ÇØÁ¦ÇÔ
             fclose( pstFile );
             kFreeMemory( pbBuffer );
             return ;
         }
     }
-    // ì‹œê°„ ì¶œë ¥
+    // ½Ã°£ Ãâ·Â
     kPrintf( "   Sequential Read(1 Byte): %d ms\n", kGetTickCount() -
              qwLastTickCount );
 
-    // íŒŒì¼ì„ ë‹«ê³  ë©”ëª¨ë¦¬ë¥¼ í•´ì œí•¨
+    // ÆÄÀÏÀ» ´İ°í ¸Ş¸ğ¸®¸¦ ÇØÁ¦ÇÔ
     fclose( pstFile );
     kFreeMemory( pbBuffer );
 }
 
 /**
- *  íŒŒì¼ ì‹œìŠ¤í…œì˜ ìºì‹œ ë²„í¼ì— ìˆëŠ” ë°ì´í„°ë¥¼ ëª¨ë‘ í•˜ë“œ ë””ìŠ¤í¬ì— ì”€
+ *  ÆÄÀÏ ½Ã½ºÅÛÀÇ Ä³½Ã ¹öÆÛ¿¡ ÀÖ´Â µ¥ÀÌÅÍ¸¦ ¸ğµÎ ÇÏµå µğ½ºÅ©¿¡ ¾¸
  */
 static void kFlushCache( const char* pcParameterBuffer )
 {
@@ -2387,4 +2434,29 @@ static void kFlushCache( const char* pcParameterBuffer )
         kPrintf( "Fail\n" );
     }
     kPrintf( "Total Time = %d ms\n", kGetTickCount() - qwTickCount );
+}
+static void kMkdir( const char* pcParamegerBuffer ){
+    FILE* pstFile;
+    PARAMETERLIST stList;
+    char vcFileName[ 50 ];
+    int iLength;
+    DWORD dwCluster;
+    
+    kInitializeParameter( &stList, pcParamegerBuffer );
+    iLength = kGetNextParameter( &stList, vcFileName );
+    vcFileName[ iLength ] = '\0';
+    if( ( iLength > ( FILESYSTEM_MAXFILENAMELENGTH - 1 ) ) || ( iLength == 0 ) )
+    {
+        kPrintf( "Too Long or Too Short File Name\n" );
+        return ;
+    }
+
+    pstFile = opendir( vcFileName);
+    if( pstFile != NULL )
+    {
+        fclose( pstFile );
+        kPrintf( "Done!\n" );
+    }
+    kPrintf( "Fail!\n" );
+    return;
 }
