@@ -72,6 +72,7 @@ SHELLCOMMANDENTRY gs_vstCommandTable[] =
         { "flush", "Flush File System Cache", kFlushCache },
         { "mkdir", "Make Dir", kMkdir},
         { "cd", "move", kCd},
+        { "rmdir", "Remove", kRmdir},
 
 };
 
@@ -2533,7 +2534,26 @@ static void kCd( const char* pcParamegerBuffer){
             
             }
         }
+    }    
+}
+static void kRmdir( const char* pcParameterBuffer )
+{
+    PARAMETERLIST stList;
+    char vcFileName[ 50 ];
+    int iLength;
+    kInitializeParameter( &stList, pcParameterBuffer );
+    iLength = kGetNextParameter( &stList, vcFileName );
+    vcFileName[ iLength ] = '\0';
+    if( ( iLength > ( FILESYSTEM_MAXFILENAMELENGTH - 1 ) ) || ( iLength == 0 ) )
+    {
+        kPrintf( "Too Long or Too Short File Name\n" );
+        return ;
     }
-
+    if( remove( vcFileName ) != 0 )
+    {
+        kPrintf( "File Not Found or File Opened\n" );
+        return ;
+    }
     
+    kPrintf( "File Delete Success\n" );
 }

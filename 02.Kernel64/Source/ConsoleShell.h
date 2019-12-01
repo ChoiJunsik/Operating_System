@@ -112,4 +112,6 @@ static void kFlushCache( const char* pcParameterBuffer );
 static void kTestPerformance( const char* pcParameterBuffer );
 static void kMkdir( const char* pcParamegerBuffer );
 static void kCd( const char* pcParamegerBuffer);
+static void kRmdir( const char* pcParamegerBuffer);
+
 #endif /*__CONSOLESHELL_H__*/
