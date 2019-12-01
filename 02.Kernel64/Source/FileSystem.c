@@ -254,7 +254,7 @@ BOOL kFormat( void )
         kDiscardAllCacheBuffer( CACHE_CLUSTERLINKTABLEAREA );
         kDiscardAllCacheBuffer( CACHE_DATAAREA );
     }
-    kSetDotInDirectory();
+    kMakeDot();
 
     // 동기화 처리
     kUnlock( &( gs_stFileSystemManager.stMutex ) );

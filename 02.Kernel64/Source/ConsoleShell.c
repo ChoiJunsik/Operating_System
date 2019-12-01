@@ -1719,7 +1719,7 @@ static void kShowRootDirectory( const char* pcParameterBuffer )
     // ���� �ý��� ������ ����
     kGetFileSystemInformation( &stManager );
     //+
-    info = kFindDirectory(curDirectoryClusterIdx);
+    info = kFindDir(curDirectoryClusterIdx);
     if(info==NULL) return ;
     for( i = 0 ; i < FILESYSTEM_MAXDIRECTORYENTRYCOUNT ; i++ )
     {
@@ -2486,7 +2486,7 @@ static void kCd( const char* pcParamegerBuffer){
         return ;
     }
     kGetFileSystemInformation( &stManager );  
-    info = kFindDirectory(curDirectoryClusterIdx);
+    info = kFindDir(curDirectoryClusterIdx);
 
     if(kMemCmp(vcFileName,".",2)==0){
         curDirectoryClusterIdx = info[0].parentCluserIdx;
@@ -2521,7 +2521,7 @@ static void kCd( const char* pcParamegerBuffer){
                 info = kFindDir(curDirectoryClusterIdx);
                 if( info[0].dwStartClusterIndex != -1 )
                 {
-                    kSetDotInDirectory();
+                    kMakeDot();
                     kUpdateDirectory(0,".",pwd,curDirectoryClusterIdx);
                 
                 }
