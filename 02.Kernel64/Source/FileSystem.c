@@ -254,7 +254,8 @@ BOOL kFormat( void )
         kDiscardAllCacheBuffer( CACHE_CLUSTERLINKTABLEAREA );
         kDiscardAllCacheBuffer( CACHE_DATAAREA );
     }
-    
+    kSetDotInDirectory();
+
     // 동기화 처리
     kUnlock( &( gs_stFileSystemManager.stMutex ) );
     return TRUE;
@@ -803,21 +804,16 @@ static BOOL kGetClusterLinkData( DWORD dwClusterIndex, DWORD* pdwData )
     *pdwData = ( ( DWORD* ) gs_vbTempBuffer )[ dwClusterIndex % 128 ];
     return TRUE;
 }
-DIRECTORYENTRY* kFindDirectory( DWORD currentCluster )
+DIRECTORYENTRY* kFindDir( DWORD currentClusterIdx )
 {
     DIRECTORYENTRY* pstEntry = NULL;
-    int i;
 
-    if( kReadCluster( currentCluster, gs_vbTempBuffer ) == FALSE )
+    if( kReadCluster( currentClusterIdx, gs_vbTempBuffer ) == FALSE )
     {
         return NULL;
     }
     pstEntry = ( DIRECTORYENTRY* ) gs_vbTempBuffer;
-    if(pstEntry == NULL)
-        return NULL;
-
     return pstEntry;
-    
 }
 
 /**

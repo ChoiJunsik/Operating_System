@@ -111,4 +111,5 @@ static void kTestFileIO( const char* pcParameterBuffer );
 static void kFlushCache( const char* pcParameterBuffer );
 static void kTestPerformance( const char* pcParameterBuffer );
 static void kMkdir( const char* pcParamegerBuffer );
+static void kCd( const char* pcParamegerBuffer);
 #endif /*__CONSOLESHELL_H__*/

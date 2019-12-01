@@ -280,6 +280,6 @@ static BOOL kNewDirectory( const char* pcFileName, DIRECTORYENTRY* pstEntry,
         int* piDirectoryEntryIndex );
 void kSetClusterIndex(DWORD curDirectoryClusterIdx);
 void kMakeDot();
-DIRECTORYENTRY* kFindDirectory( DWORD curCluster );
+DIRECTORYENTRY* kFindDir( DWORD curDirectoryClusterIdx );
 
 #endif /*__FILESYSTEM_H__*/
