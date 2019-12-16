@@ -1,9 +1,5 @@
 # 64비트 싱글코어 운영체제 개발 프로젝트
 
-## 주 교재
-
-- https://github.com/HIPERCUBE/64bit-Multicore-OS
-
 ## 팀구성
 
 - 최준식
@@ -20,3 +16,7 @@
 - 과제4 : 스케줄러 구현
 - 과제5 : FAT 파일 시스템 구현
 - 추가구현 : FAT 파일 시스템에 유저별 권한 
+
+
+## 레퍼런스
+- https://github.com/HIPERCUBE/64bit-Multicore-OS
