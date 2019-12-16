@@ -1,7 +1,7 @@
 /**
  *  file    FileSystem.h
  *  date    2009/05/01
- *  author  kkamagui 
+ *  author  kkamagui
  *          Copyright(c)2008 All rights reserved by kkamagui
  *  brief  ���� �ý��ۿ� ���õ� ��� ����
  */
@@ -50,11 +50,11 @@
 #define FILESYSTEM_SEEK_END                 2
 
 // �ϵ� ��ũ ��� ���õ� �Լ� ������ Ÿ�� ����
-typedef BOOL (* fReadHDDInformation ) ( BOOL bPrimary, BOOL bMaster, 
+typedef BOOL (* fReadHDDInformation ) ( BOOL bPrimary, BOOL bMaster,
         HDDINFORMATION* pstHDDInformation );
-typedef int (* fReadHDDSector ) ( BOOL bPrimary, BOOL bMaster, DWORD dwLBA, 
+typedef int (* fReadHDDSector ) ( BOOL bPrimary, BOOL bMaster, DWORD dwLBA,
         int iSectorCount, char* pcBuffer );
-typedef int (* fWriteHDDSector ) ( BOOL bPrimary, BOOL bMaster, DWORD dwLBA, 
+typedef int (* fWriteHDDSector ) ( BOOL bPrimary, BOOL bMaster, DWORD dwLBA,
         int iSectorCount, char* pcBuffer );
 
 // MINT ���� �ý��� �Լ��� ǥ�� ����� �Լ� �̸����� ������
@@ -75,7 +75,7 @@ typedef int (* fWriteHDDSector ) ( BOOL bPrimary, BOOL bMaster, DWORD dwLBA,
 #define SEEK_END    FILESYSTEM_SEEK_END
 
 // MINT ���� �ý��� Ÿ�԰� �ʵ带 ǥ�� ������� Ÿ������ ������
-#define size_t      DWORD       
+#define size_t      DWORD
 #define dirent      kDirectoryEntryStruct
 #define d_name      vcFileName
 
@@ -119,10 +119,10 @@ typedef struct kMBRStruct
     DWORD dwClusterLinkSectorCount;
     // Ŭ�������� ��ü ����
     DWORD dwTotalClusterCount;
-    
+
     // ��Ƽ�� ���̺�
     PARTITION vstPartition[ 4 ];
-    
+
     // ��Ʈ �δ� �ñ׳�ó, 0x55, 0xAA
     BYTE vbBootLoaderSignature[ 2 ];
 } MBR;
@@ -137,9 +137,17 @@ typedef struct kDirectoryEntryStruct
     DWORD dwFileSize;
     // ������ �����ϴ� Ŭ������ �ε���
     DWORD dwStartClusterIndex;
+
+    BYTE bSecond, bMinute, bHour;
+    BYTE bDayOfMonth, bMonth;
+    WORD wYear;
+    
     int type;
     char parentPath[FILESYSTEM_MAXFILENAMELENGTH];
     DWORD parentCluserIdx;
+
+
+
 } DIRECTORYENTRY;
 
 #pragma pack( pop )
@@ -166,7 +174,7 @@ typedef struct kDirectoryHandleStruct
 {
     // ��Ʈ ���͸��� �����ص� ����
     DIRECTORYENTRY* pstDirectoryBuffer;
-    
+
     // ���͸� �������� ���� ��ġ
     int iCurrentOffset;
 } DIRECTORYHANDLE;
@@ -184,7 +192,7 @@ typedef struct kFileDirectoryHandleStruct
         FILEHANDLE stFileHandle;
         // ���͸� �ڵ�
         DIRECTORYHANDLE stDirectoryHandle;
-    };    
+    };
 } FILE, DIR;
 
 // ���� �ý����� �����ϴ� ����ü
@@ -192,24 +200,24 @@ typedef struct kFileSystemManagerStruct
 {
     // ���� �ý����� ���������� �νĵǾ����� ����
     BOOL bMounted;
-    
+
     // �� ������ ���� ���� ���� LBA ��巹��
     DWORD dwReservedSectorCount;
     DWORD dwClusterLinkAreaStartAddress;
     DWORD dwClusterLinkAreaSize;
-    DWORD dwDataAreaStartAddress;   
+    DWORD dwDataAreaStartAddress;
     // ������ ������ Ŭ�������� �� ����
     DWORD dwTotalClusterCount;
-    
+
     // ���������� Ŭ�����͸� �Ҵ��� Ŭ������ ��ũ ���̺��� ���� �������� ����
     DWORD dwLastAllocatedClusterLinkSectorOffset;
-    
+
     // ���� �ý��� ����ȭ ��ü
-    MUTEX stMutex;    
-    
+    MUTEX stMutex;
+
     // �ڵ� Ǯ(Handle Pool)�� ��巹��
     FILE* pstHandlePool;
-    
+
     // ĳ�ø� ����ϴ��� ����
     BOOL bCacheEnable;
 } FILESYSTEMMANAGER;
@@ -240,13 +248,13 @@ static int kFindDirectoryEntry( const char* pcFileName, DIRECTORYENTRY* pstEntry
 void kGetFileSystemInformation( FILESYSTEMMANAGER* pstManager );
 
 // ĳ�� ���� �Լ�
-static BOOL kInternalReadClusterLinkTableWithoutCache( DWORD dwOffset, 
+static BOOL kInternalReadClusterLinkTableWithoutCache( DWORD dwOffset,
         BYTE* pbBuffer );
-static BOOL kInternalReadClusterLinkTableWithCache( DWORD dwOffset, 
+static BOOL kInternalReadClusterLinkTableWithCache( DWORD dwOffset,
         BYTE* pbBuffer );
-static BOOL kInternalWriteClusterLinkTableWithoutCache( DWORD dwOffset, 
+static BOOL kInternalWriteClusterLinkTableWithoutCache( DWORD dwOffset,
         BYTE* pbBuffer );
-static BOOL kInternalWriteClusterLinkTableWithCache( DWORD dwOffset, 
+static BOOL kInternalWriteClusterLinkTableWithCache( DWORD dwOffset,
         BYTE* pbBuffer );
 static BOOL kInternalReadClusterWithoutCache( DWORD dwOffset, BYTE* pbBuffer );
 static BOOL kInternalReadClusterWithCache( DWORD dwOffset, BYTE* pbBuffer );
@@ -272,11 +280,11 @@ BOOL kIsFileOpened( const DIRECTORYENTRY* pstEntry );
 BOOL kUpdateDir( int directoryEntryIdx,const char* fileName,const char* parentPath, int parentIdx );
 static void* kAllocateFileDirectoryHandle( void );
 static void kFreeFileDirectoryHandle( FILE* pstFile );
-static BOOL kCreateFile( const char* pcFileName, DIRECTORYENTRY* pstEntry, 
+static BOOL kCreateFile( const char* pcFileName, DIRECTORYENTRY* pstEntry,
         int* piDirectoryEntryIndex );
 static BOOL kFreeClusterUntilEnd( DWORD dwClusterIndex );
 static BOOL kUpdateDirectoryEntry( FILEHANDLE* pstFileHandle );
-static BOOL kNewDirectory( const char* pcFileName, DIRECTORYENTRY* pstEntry, 
+static BOOL kNewDirectory( const char* pcFileName, DIRECTORYENTRY* pstEntry,
         int* piDirectoryEntryIndex );
 void kSetClusterIndex(DWORD curDirectoryClusterIdx);
 void kMakeDot();
