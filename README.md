@@ -19,4 +19,4 @@
 
 
 ## 레퍼런스
-- https://github.com/HIPERCUBE/64bit-Multicore-OS
+- IT EXPERT 64비트 멀티코어 OS 원리와 구조 1
