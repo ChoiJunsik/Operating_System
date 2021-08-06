@@ -14,9 +14,3 @@
 2. 커널 부팅시 시스템초기화, 메모리 기능 구현( + BIOS를 통해 사용가능 메모리 알아내기, 페이지 테이블 이용 Memory Double Mapping )
 3. Exception Handler 구현, Shell 구현
 4. 스케줄러 구현
-5. FAT 파일 시스템 구현
-6. FAT 파일 시스템에 유저별 권한 
-
-
-## 레퍼런스
-- IT EXPERT 64비트 멀티코어 OS 원리와 구조 1
